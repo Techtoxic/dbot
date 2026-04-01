@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deriv Last Digit Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --white: #ffffff;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #e2e8f0;
+            --highlight-green: #00ff7f;
+            --highlight-red: #ff4d4d;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 100%;
+            padding: 10px;
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            align-items: start;
+        }
+
+        header {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            background: linear-gradient(90deg, var(--primary), #3f37c9);
+            -webkit-background-clip: text;
+            color: transparent;
+            font-weight: 600;
+        }
+
+        .controls-container {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 6px;
+            border: 2px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-size: 0.9rem;
+        }
+
+        select:focus,
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        button {
+            cursor: pointer;
+            background-color: var(--primary);
+            color: var(--white);
+            font-weight: 600;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: var(--primary-dark);
+        }
+
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .last-tick-container {
+            font-weight: 600;
+            padding: 8px;
+            background-color: var(--card-bg);
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .last-tick-container span {
+            color: var(--primary);
+        }
+
+        .stats-container {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .stats-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .bar-container {
+            height: 12px;
+            background-color: var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .bar {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.6s ease;
+        }
+
+        .even-bar,
+        .rise-bar {
+            background-color: var(--primary);
+        }
+
+        .odd-bar,
+        .fall-bar {
+            background-color: var(--primary-dark);
+        }
+
+        .circle-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            padding: 10px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+        }
+
+        .circle-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--white);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .circle.most-frequent {
+            background: linear-gradient(135deg, var(--highlight-green), #00cc66);
+            transform: scale(1.1);
+            box-shadow: 0 0 12px var(--highlight-green);
+            animation: glow 2s infinite;
+        }
+
+        .circle.least-frequent {
+            background: linear-gradient(135deg, var(--highlight-red), #cc3333);
+            transform: scale(0.9);
+            box-shadow: 0 0 12px var(--highlight-red);
+            animation: glow 2s infinite;
+        }
+
+        .circle.current-tick {
+            border: 3px solid #ffd700;
+            animation: pulse 1.5s infinite;
+        }
+
+        .circle:hover {
+            transform: rotate(5deg) scale(1.05);
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 8px rgba(255, 215, 0, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 215, 0, 0);
+            }
+        }
+
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 0 15px rgba(0, 255, 127, 0.5);
+            }
+
+            100% {
+                box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        .circle-wrapper .stats {
+            font-size: 0.7rem;
+            color: var(--text-color);
+        }
+
+        .history-container {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            font-weight: bold;
+            padding: 6px 12px;
+            border-radius: 16px;
+            background-color: var(--card-bg);
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .see-more-btn {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin: 10px auto;
+            display: block;
+        }
+
+        .see-more-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .error-message {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--highlight-red);
+            color: var(--white);
+            padding: 8px 16px;
+            border-radius: 6px;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 8px;
+            }
+
+            .circle {
+                width: 40px;
+                height: 40px;
+                font-size: 0.9rem;
+            }
+
+            .circle-wrapper .stats {
+                font-size: 0.65rem;
+            }
+
+            .circle-container {
+                grid-template-columns: repeat(5, 1fr);
+            }
+
+            button,
+            select,
+            input {
+                min-height: 40px;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.3rem;
+            }
+
+            .circle {
+                width: 35px;
+                height: 35px;
+                font-size: 0.8rem;
+            }
+
+            .circle-container {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 6px;
+            }
+
+            .stats-container {
+                width: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Deriv Last Digit</h1>
+            <div class="last-tick-container">
+                Last Tick: <span id="last-tick-value">N/A</span> (<span id="last-tick-time"></span>)
+            </div>
+        </header>
+
+        <div class="controls-container">
+            <div class="form-group">
+                <label for="market">Select Market:</label>
+                <select id="market" aria-label="Select market">
+                    <option value="R_10">Volatility 10</option>
+                    <option value="R_25">Volatility 25</option>
+                    <option value="R_50">Volatility 50</option>
+                    <option value="R_75">Volatility 75</option>
+                    <option value="R_100">Volatility 100</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ticks">Ticks to analyze:</label>
+                <input type="number" id="ticks" value="100" min="10" max="1000" aria-label="Number of ticks">
+            </div>
+            <div class="form-group">
+                <button id="connect-btn"><i class="fa fa-play"></i> Start</button>
+                <button id="pause-btn" disabled><i class="fa fa-pause"></i> Pause</button>
+                <button id="reset-btn"><i class="fas fa-undo"></i> Reset</button>
+            </div>
+        </div>
+
+        <div id="circle-container" class="circle-container"></div>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>Even/odd</h3>
+                <div class="bar-container">
+                    <div class="bar" id="even-bar"></div>
+                </div>
+                <div>Even: <span id="even-%">0%</span> | Odd: <span id="odd-%">0%</span></div>
+            </div>
+            <div class="stat-card">
+                <h3>Rise/Fall</h3>
+                <div class="bar-container">
+                    <div class="bar" id="rise-bar"></div>
+                </div>
+                <div>Rise: <span id="rise-%">0%</span> | Fall: <span id="fall-%">0%</span></div>
+            </div>
+            <div class="stat-card">
+                <h3>Market info</h3>
+                <div>Total Ticks: <span id="total-ticks">0</span></div>
+                <div>Market: <span id="current-market">N/A</span></div>
+            </div>
+        </div>
+
+        <h2>Recent Ticks</h2>
+        <div id="history-container" class="history-container"></div>
+        <button id="see-more-btn" class="see-more-btn">See More (Last 100 Digits)</button>
+    </div>
+
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+        <i class="fas fa-moon"></i>
+    </button>
+
+    <footer>
+        <p>© 2025 Deriv Analysis Tool</p>
+    </footer>
+
+    <script>
+        const API_TOKEN = "n6rqpKj9hrdfbiM";
+        const APP_ID = "70549";
+        let tickHistory = [];
+        let ws;
+        let isDarkMode = false;
+        let isPaused = false;
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT_ATTEMPTS = 3;
+        let isHistoryExpanded = false;
+
+        const DOM = {
+            market: document.getElementById('market'),
+            tickCount: document.getElementById('ticks'),
+            connectBtn: document.getElementById('connect-btn'),
+            pauseBtn: document.getElementById('pause-btn'),
+            resetBtn: document.getElementById('reset-btn'),
+            lastTickValue: document.getElementById('last-tick-value'),
+            lastTickTime: document.getElementById('last-tick-time'),
+            totalTicks: document.getElementById('total-ticks'),
+            currentMarket: document.getElementById('current-market'),
+            evenBar: document.getElementById('even-bar'),
+            evenPercent: document.getElementById('even-%'),
+            oddPercent: document.getElementById('odd-%'),
+            riseBar: document.getElementById('rise-bar'),
+            risePercent: document.getElementById('rise-%'),
+            fallPercent: document.getElementById('fall-%'),
+            circleContainer: document.getElementById('circle-container'),
+            historyContainer: document.getElementById('history-container'),
+            seeMoreBtn: document.getElementById('see-more-btn'),
+            themeToggle: document.getElementById('theme-toggle')
+        };
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            document.body.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+            DOM.themeToggle.innerHTML = isDarkMode ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+        }
+
+        function showError(message) {
+            const error = document.createElement('div');
+            error.className = 'error-message';
+            error.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+            document.body.appendChild(error);
+            setTimeout(() => error.remove(), 5000);
+        }
+
+        async function fetchHistoricalTicks(market, count) {
+            const wsHistory = new WebSocket(`wss://ws.binaryws.com/websockets/v3?app_id=${APP_ID}`);
+            return new Promise((resolve, reject) => {
+                wsHistory.onopen = () => wsHistory.send(JSON.stringify({ ticks_history: market, count, end: 'latest', style: 'ticks' }));
+                wsHistory.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    if (data.error) {
+                        showError(data.error.message);
+                        reject(data.error.message);
+                    } else if (data.history?.prices) {
+                        resolve(data.history.prices);
+                    }
+                    wsHistory.close();
+                };
+                wsHistory.onerror = () => {
+                    showError('Failed to fetch historical data');
+                    reject();
+                };
+            });
+        }
+
+        async function connectWebSocket() {
+            const market = DOM.market.value;
+            const tickLimit = parseInt(DOM.tickCount.value);
+            localStorage.setItem('market', market);
+            localStorage.setItem('tickCount', tickLimit);
+
+            DOM.connectBtn.disabled = true;
+            DOM.connectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+
+            try {
+                tickHistory = [];
+                const historicalTicks = await fetchHistoricalTicks(market, tickLimit);
+                tickHistory = historicalTicks.map(price => extractLastDigit(price, market));
+                updateDisplay();
+
+                if (ws) ws.close();
+                ws = new WebSocket(`wss://ws.binaryws.com/websockets/v3?app_id=${APP_ID}`);
+
+                ws.onopen = () => {
+                    reconnectAttempts = 0;
+                    DOM.connectBtn.innerHTML = '<i class="fas fa-stop"></i> Stop';
+                    DOM.connectBtn.disabled = false;
+                    DOM.pauseBtn.disabled = false;
+                    ws.send(JSON.stringify({ authorize: API_TOKEN }));
+                    ws.send(JSON.stringify({ ticks: market, subscribe: 1 }));
+                };
+
+                ws.onmessage = (event) => {
+                    if (isPaused) return;
+                    const data = JSON.parse(event.data);
+                    if (data.error) showError(data.error.message);
+                    if (data.tick) processTick(data.tick);
+                };
+
+                ws.onclose = () => {
+                    if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                        reconnectAttempts++;
+                        setTimeout(connectWebSocket, 2000 * reconnectAttempts);
+                    } else {
+                        showError('WebSocket connection lost');
+                        resetUI();
+                    }
+                };
+
+                ws.onerror = () => showError('WebSocket error');
+            } catch (error) {
+                resetUI();
+            }
+        }
+
+        function resetUI() {
+            DOM.connectBtn.innerHTML = '<i class="fas fa-play"></i> Start';
+            DOM.connectBtn.disabled = false;
+            DOM.pauseBtn.disabled = true;
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            DOM.pauseBtn.innerHTML = isPaused ? '<i class="fas fa-play"></i> Resume' : '<i class="fas fa-pause"></i> Pause';
+        }
+
+        function resetAnalysis() {
+            tickHistory = [];
+            disconnectWebSocket();
+            updateDisplay();
+        }
+
+        function disconnectWebSocket() {
+            if (ws) ws.close();
+            resetUI();
+        }
+
+        function processTick(tick) {
+            const market = DOM.market.value;
+            const priceStr = formatPrice(tick.quote, getVolatility(market));
+            const lastDigit = parseInt(priceStr.match(/\.(\d+)$/)?.[1].slice(-1) || priceStr.slice(-1));
+
+            DOM.lastTickValue.textContent = priceStr;
+            DOM.lastTickTime.textContent = new Date().toLocaleTimeString();
+
+            tickHistory.push(lastDigit);
+            const tickLimit = parseInt(DOM.tickCount.value);
+            if (tickHistory.length > tickLimit) tickHistory.shift();
+
+            requestAnimationFrame(() => updateDisplay(lastDigit));
+        }
+
+        function extractLastDigit(price, market) {
+            const volatility = getVolatility(market);
+            const formattedPrice = price.toFixed(getDecimalPlacesFromVolatility(volatility));
+            return parseInt(formattedPrice.match(/\.(\d+)$/)?.[1].slice(-1) || formattedPrice.slice(-1));
+        }
+
+        function formatPrice(price, volatility) {
+            return price.toFixed(getDecimalPlacesFromVolatility(volatility));
+        }
+
+        function getVolatility(market) {
+            return { R_10: '10', R_25: '25', R_50: '50', R_75: '75', R_100: '100' }[market] || '100';
+        }
+
+        function getDecimalPlacesFromVolatility(volatility) {
+            return { '10': 3, '25': 3, '50': 4, '75': 4 }[volatility] || 2;
+        }
+
+        function calculateRiseFall() {
+            let rise = 0, fall = 0;
+            for (let i = 1; i < tickHistory.length; i++) {
+                if (tickHistory[i] > tickHistory[i - 1]) rise++;
+                else if (tickHistory[i] < tickHistory[i - 1]) fall++;
+            }
+            const total = tickHistory.length - 1;
+            const risePercent = total ? (rise / total * 100).toFixed(1) : 0;
+            const fallPercent = total ? (100 - parseFloat(risePercent)).toFixed(1) : 0;
+            return { risePercent, fallPercent };
+        }
+
+        function updateDisplay(lastDigit = null) {
+            const total = tickHistory.length;
+            DOM.totalTicks.textContent = total;
+            DOM.currentMarket.textContent = DOM.market.options[DOM.market.selectedIndex].text;
+
+            const counts = Array(10).fill(0);
+            tickHistory.forEach(num => counts[num]++);
+
+            const even = tickHistory.filter(n => n % 2 === 0).length;
+            const evenPercent = total ? (even / total * 100).toFixed(1) : 0;
+            const oddPercent = total ? (100 - parseFloat(evenPercent)).toFixed(1) : 0;
+
+            const { risePercent, fallPercent } = calculateRiseFall();
+
+            DOM.evenBar.style.width = `${evenPercent}%`;
+            DOM.evenPercent.textContent = `${evenPercent}%`;
+            DOM.oddPercent.textContent = `${oddPercent}%`;
+
+            DOM.riseBar.style.width = `${risePercent}%`;
+            DOM.risePercent.textContent = `${risePercent}%`;
+            DOM.fallPercent.textContent = `${fallPercent}%`;
+
+            // Update circles
+            DOM.circleContainer.innerHTML = '';
+            const maxCount = Math.max(...counts);
+            const minCount = Math.min(...counts.filter(c => c > 0)) || 0;
+
+            for (let i = 0; i <= 9; i++) {
+                const percent = total ? (counts[i] / total * 100).toFixed(1) : 0;
+                const wrapper = document.createElement('div');
+                wrapper.className = 'circle-wrapper';
+
+                const circle = document.createElement('div');
+                circle.className = `circle ${i === lastDigit ? 'current-tick' : ''} ${counts[i] === maxCount && total ? 'most-frequent' : ''} ${counts[i] === minCount && total ? 'least-frequent' : ''}`;
+                circle.innerText = i;
+
+                const stats = document.createElement('div');
+                stats.className = 'stats';
+                stats.innerText = `${counts[i]} (${percent}%)`;
+
+                wrapper.appendChild(circle);
+                wrapper.appendChild(stats);
+                DOM.circleContainer.appendChild(wrapper);
+            }
+
+            // Update history
+            updateHistory();
+        }
+
+        function updateHistory() {
+            DOM.historyContainer.innerHTML = '';
+            const displayCount = isHistoryExpanded ? 100 : 10;
+            tickHistory.slice(-displayCount).forEach(num => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerText = num;
+                DOM.historyContainer.appendChild(item);
+            });
+            DOM.seeMoreBtn.textContent = isHistoryExpanded ? 'See Less' : 'See More (Last 100 Digits)';
+        }
+
+        function toggleHistory() {
+            isHistoryExpanded = !isHistoryExpanded;
+            updateHistory();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            DOM.themeToggle.addEventListener('click', toggleTheme);
+            DOM.connectBtn.addEventListener('click', connectWebSocket);
+            DOM.pauseBtn.addEventListener('click', togglePause);
+            DOM.resetBtn.addEventListener('click', resetAnalysis);
+            DOM.seeMoreBtn.addEventListener('click', toggleHistory);
+
+            const savedMarket = localStorage.getItem('market');
+            const savedTickCount = localStorage.getItem('tickCount');
+            if (savedMarket) DOM.market.value = savedMarket;
+            if (savedTickCount) DOM.tickCount.value = savedTickCount;
+
+            if (localStorage.getItem('theme') === 'dark') toggleTheme();
+            connectWebSocket();
+        });
+    </script>
+</body>
+
+</html>

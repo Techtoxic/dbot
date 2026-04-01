@@ -1,0 +1,224 @@
+/* Copy Trading Styles */
+.copy-trading {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.copy-trading__heading {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-general);
+    text-align: center;
+}
+
+.copy-trading__description {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.copy-trading__content-wrapper {
+    background: var(--general-section-1);
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+}
+
+.copy-trading__account-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.copy-trading__account {
+    background: var(--general-main-1);
+    border: 2px solid var(--border-normal);
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.copy-trading__account h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-general);
+}
+
+.copy-trading__balance {
+    margin-bottom: 1rem;
+}
+
+.copy-trading__balance-label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.copy-trading__balance-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-general);
+}
+
+.copy-trading__status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.copy-trading__status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.copy-trading__status-dot.demo {
+    background-color: #4caf50;
+}
+
+.copy-trading__status-dot.real {
+    background-color: #2196f3;
+}
+
+.copy-trading__status-dot.inactive {
+    background-color: #9e9e9e;
+}
+
+.copy-trading__controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.copy-trading__toggle {
+    display: flex;
+    align-items: center;
+}
+
+.copy-trading__toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.copy-trading__toggle-label input[type='checkbox'] {
+    display: none;
+}
+
+.copy-trading__toggle-slider {
+    position: relative;
+    width: 60px;
+    height: 30px;
+    background-color: var(--border-normal);
+    border-radius: 15px;
+    transition: background-color 0.3s;
+}
+
+.copy-trading__toggle-slider:before {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: transform 0.3s;
+}
+
+.copy-trading__toggle-label input[type='checkbox']:checked + .copy-trading__toggle-slider {
+    background-color: #4caf50;
+}
+
+.copy-trading__toggle-label input[type='checkbox']:checked + .copy-trading__toggle-slider:before {
+    transform: translateX(30px);
+}
+
+.copy-trading__toggle-label input[type='checkbox']:disabled + .copy-trading__toggle-slider {
+    background-color: #9e9e9e;
+    cursor: not-allowed;
+}
+
+.copy-trading__add-funds-btn {
+    background: linear-gradient(135deg, #4caf50, #45a049);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgb(76 175 80 / 30%);
+}
+
+.copy-trading__add-funds-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgb(76 175 80 / 40%);
+}
+
+.copy-trading__info {
+    background: var(--general-section-2);
+    border-radius: 8px;
+    padding: 1.5rem;
+    border-left: 4px solid #2196f3;
+}
+
+.copy-trading__info h4 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-general);
+}
+
+.copy-trading__info ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.copy-trading__info li {
+    padding: 0.5rem 0;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+/* Responsive Design */
+@media (width <= 768px) {
+    .copy-trading {
+        padding: 1rem;
+    }
+
+    .copy-trading__account-info {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .copy-trading__controls {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .copy-trading__toggle-label {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+}

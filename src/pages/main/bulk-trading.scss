@@ -1,0 +1,112 @@
+.bulk-trading {
+    padding: 2rem;
+    max-width: 800px;
+    margin: 0 auto;
+
+    &__heading {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--text-prominent);
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+
+    &__description {
+        text-align: center;
+        margin-bottom: 2rem;
+
+        p {
+            font-size: 1.1rem;
+            color: var(--text-general);
+            line-height: 1.6;
+        }
+    }
+
+    &__content-wrapper {
+        display: flex;
+        justify-content: center;
+    }
+
+    &__bot-preview {
+        background: var(--general-section-1);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 12px rgb(0 0 0 / 10%);
+        border: 1px solid var(--border-normal);
+        max-width: 500px;
+        width: 100%;
+
+        h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-prominent);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+    }
+
+    &__features {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 2rem;
+
+        li {
+            padding: 0.75rem 0;
+            font-size: 1rem;
+            color: var(--text-general);
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--border-disabled);
+
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+    }
+
+    &__load-btn {
+        width: 100%;
+        padding: 1rem 2rem;
+        background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        color: var(--text-colored-background);
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgb(255 107 53 / 30%);
+
+        &:hover {
+            background: linear-gradient(135deg, #e55a2b 0%, #e0841a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgb(255 107 53 / 40%);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+    }
+
+    // Mobile responsiveness
+    @media (width <= 768px) {
+        padding: 1rem;
+
+        &__heading {
+            font-size: 1.5rem;
+        }
+
+        &__bot-preview {
+            padding: 1.5rem;
+        }
+
+        &__features li {
+            font-size: 0.9rem;
+        }
+
+        &__load-btn {
+            font-size: 1rem;
+            padding: 0.875rem 1.5rem;
+        }
+    }
+}

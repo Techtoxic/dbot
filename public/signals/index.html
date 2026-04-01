@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart Trading Signals - AI Pattern Recognition</title>
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --card-bg: rgba(255, 255, 255, 0.1);
+      --accent: #4facfe;
+      --accent2: #00f2fe;
+      --success: #00d4aa;
+      --warning: #ffb347;
+      --danger: #ff6b6b;
+      --text-primary: #ffffff;
+      --text-secondary: #e0e6ed;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      max-height: 100vh;
+      overflow: hidden;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      font-weight: 300;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+
+    .market-selector {
+      position: relative;
+    }
+
+    .market-selector select {
+      background: rgba(255, 255, 255, 0.95);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      color: #333;
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .market-selector select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 20px rgba(79, 172, 254, 0.3);
+      background: rgba(255, 255, 255, 1);
+    }
+
+    .market-selector select option {
+      background: #fff;
+      color: #333;
+      padding: 8px 12px;
+      font-weight: 500;
+    }
+
+    .market-selector select optgroup {
+      background: #f8f9fa;
+      color: #495057;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .market-selector select option:hover,
+    .market-selector select option:focus {
+      background: #e3f2fd;
+      color: #1976d2;
+    }
+
+    .get-signals-btn {
+      background: linear-gradient(135deg, var(--success), #00b894);
+      border: none;
+      border-radius: 12px;
+      color: white;
+      padding: 12px 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
+    }
+
+    .get-signals-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 212, 170, 0.4);
+    }
+
+    .market-info {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      flex-shrink: 0;
+    }
+
+    .market-stats {
+      display: flex;
+      justify-content: space-around;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .market-stats > div {
+      font-weight: 500;
+    }
+
+    .signals-container {
+      flex: 1;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      padding-right: 0.5rem;
+      max-height: calc(100vh - 280px);
+    }
+
+    /* Custom scrollbar for signals container */
+    .signals-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .signals-container::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    .signals-container::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .signals-container::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .signal-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.2rem;
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      height: fit-content;
+    }
+
+    .signal-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    .signal-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .high-confidence::before {
+      background: linear-gradient(90deg, var(--success), #00b894);
+    }
+
+    .medium-confidence::before {
+      background: linear-gradient(90deg, var(--warning), #fdcb6e);
+    }
+
+    .low-confidence::before {
+      background: linear-gradient(90deg, var(--danger), #e17055);
+    }
+
+    .signal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .signal-type {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--accent2);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .confidence {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .recommendation {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text-primary);
+    }
+
+    .reason {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .pattern {
+      font-family: 'Courier New', monospace;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: var(--accent2);
+      margin-top: 10px;
+    }
+
+    .no-signals {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      background: var(--card-bg);
+      border-radius: 12px;
+      backdrop-filter: blur(15px);
+      grid-column: 1 / -1;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 2rem;
+      font-size: 1rem;
+      color: var(--text-secondary);
+      grid-column: 1 / -1;
+    }
+
+    .loading::after {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s linear infinite;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 0.5rem;
+      }
+      
+      .header h1 {
+        font-size: 1.5rem;
+      }
+      
+      .header p {
+        font-size: 0.85rem;
+      }
+      
+      .controls {
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+      
+      .market-selector select,
+      .get-signals-btn {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+      }
+      
+      .signals-container {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        max-height: calc(100vh - 240px);
+      }
+      
+      .signal-card {
+        padding: 1rem;
+      }
+      
+      .market-stats {
+        flex-direction: column;
+        gap: 0.5rem;
+        font-size: 0.8rem;
+      }
+      
+      .market-info {
+        padding: 0.75rem;
+        margin-bottom: 0.75rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 0.25rem;
+      }
+      
+      .header {
+        margin-bottom: 1rem;
+      }
+      
+      .header h1 {
+        font-size: 1.3rem;
+      }
+      
+      .signals-container {
+        max-height: calc(100vh - 220px);
+      }
+    }
+
+    /* Ensure proper viewport handling */
+    @media (max-height: 600px) {
+      .header {
+        margin-bottom: 0.5rem;
+      }
+      
+      .header h1 {
+        font-size: 1.4rem;
+        margin-bottom: 0.25rem;
+      }
+      
+      .header p {
+        font-size: 0.8rem;
+      }
+      
+      .controls {
+        margin-bottom: 0.5rem;
+      }
+      
+      .market-info {
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .signals-container {
+        max-height: calc(100vh - 180px);
+      }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🧠 Smart Trading Signals</h1>
+      <p>AI-Powered Pattern Recognition & Market Analysis</p>
+    </div>
+
+    <div class="controls">
+      <div class="market-selector">
+        <select id="marketSelector">
+          <option value="">Select Market...</option>
+        </select>
+      </div>
+      <button id="getSignalsBtn" class="get-signals-btn">
+        🔍 Get Smart Signals
+      </button>
+    </div>
+
+    <div id="marketInfo" class="market-info" style="display: none;">
+      <div class="market-stats">
+        <div>Loading market data...</div>
+      </div>
+    </div>
+
+    <div id="signalsContainer" class="signals-container">
+      <div class="loading">
+        Initializing AI analysis engine...
+      </div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    const DEBUG = false;
+    const logInfo = (...args) => { if (DEBUG) console.log(...args); };
+    const logError = (...args) => { if (DEBUG) console.error(...args); };
+    // ===== SMART SIGNALS SYSTEM =====
+    logInfo('🚀 Smart Signals System Loading...');
+
+    // Market data storage
+    let ticksStorage = {};
+    let availableMarkets = [];
+    let selectedMarket = '';
+    let currentSignals = [];
+    let ws;
+    let isConnecting = false;
+    if (window.__signalsInitialized) {
+        // Avoid double init when this page is re-injected
+    }
+    window.__signalsInitialized = true;
+
+    // Initialize WebSocket connection
+    function initializeWebSocket() {
+        if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING || isConnecting)) {
+            return;
+        }
+        isConnecting = true;
+        try {
+            ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=85159');
+            logInfo('✅ WebSocket connection initiated');
+            
+            ws.onopen = function() {
+                isConnecting = false;
+                logInfo('🔗 WebSocket connected, fetching available markets...');
+                fetchAvailableMarkets();
+            };
+            
+            ws.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.active_symbols) {
+                        processAvailableMarkets(data.active_symbols);
+                    } else if (data.history && data.history.prices) {
+                        const symbol = data.echo_req.ticks_history;
+                        ticksStorage[symbol] = data.history.prices.map(price => parseFloat(price));
+                        logInfo(`📊 Loaded ${data.history.prices.length} ticks for ${symbol}`);
+                    } else if (data.tick) {
+                        const symbol = data.tick.symbol;
+                        if (ticksStorage[symbol]) {
+                            ticksStorage[symbol].push(parseFloat(data.tick.quote));
+                            if (ticksStorage[symbol].length > 500) {
+                                ticksStorage[symbol].shift();
+                            }
+                        }
+                    }
+                } catch (error) {
+                    logError('❌ Error processing WebSocket message:', error);
+                }
+            };
+            
+            ws.onerror = function(error) {
+                logError('❌ WebSocket error:', error);
+            };
+            
+            ws.onclose = function() {
+                isConnecting = false;
+                logInfo('🔌 WebSocket connection closed');
+            };
+            
+        } catch (error) {
+            isConnecting = false;
+            logError('❌ WebSocket initialization failed:', error);
+        }
+    }
+
+    // Fetch available markets from Deriv API
+    function fetchAvailableMarkets() {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+                active_symbols: "brief",
+                product_type: "basic"
+            }));
+            logInfo('📡 Requesting available markets...');
+        }
+    }
+
+    // Process available markets response
+    function processAvailableMarkets(symbols) {
+        // Filter for volatility indices (including 1s variants)
+        const volatilityMarkets = symbols.filter(function(symbol) {
+            return symbol.market === 'synthetic_index' && 
+                   symbol.submarket === 'random_index' &&
+                   symbol.symbol_type === 'stockindex' &&
+                   !symbol.is_trading_suspended;
+        });
+
+        // Sort markets
+        volatilityMarkets.sort(function(a, b) {
+            const aIsR = a.symbol.startsWith('R_');
+            const bIsR = b.symbol.startsWith('R_');
+            
+            if (aIsR && !bIsR) return -1;
+            if (!aIsR && bIsR) return 1;
+            
+            const aNum = parseInt(a.symbol.replace(/[^0-9]/g, '')) || 0;
+            const bNum = parseInt(b.symbol.replace(/[^0-9]/g, '')) || 0;
+            
+            return aNum - bNum;
+        });
+
+        availableMarkets = volatilityMarkets;
+        
+        // Initialize storage for all markets
+        availableMarkets.forEach(function(market) {
+            ticksStorage[market.symbol] = [];
+        });
+
+        logInfo(`✅ Found ${availableMarkets.length} volatility markets`);
+        
+        // Set default market
+        if (!selectedMarket && availableMarkets.length > 0) {
+            const r100Market = availableMarkets.find(function(m) { return m.symbol === 'R_100'; });
+            selectedMarket = r100Market ? r100Market.symbol : availableMarkets[0].symbol;
+        }
+        
+        updateMarketSelector();
+        
+        // Subscribe to popular markets (including some 1s variants)
+        const popularMarkets = ['R_10', 'R_25', 'R_50', 'R_75', 'R_100', 'R_101s', 'R_251s', 'R_501s'];
+        popularMarkets.forEach(function(symbol) {
+            const market = availableMarkets.find(function(m) { return m.symbol === symbol; });
+            if (market) {
+                subscribeTicks(symbol);
+            }
+        });
+    }
+
+    // Subscribe to market ticks
+    function subscribeTicks(symbol) {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({
+                ticks_history: symbol,
+                count: 500,
+                end: 'latest',
+                style: 'ticks',
+                subscribe: 1
+            }));
+            logInfo(`📡 Subscribed to ${symbol}`);
+        }
+    }
+
+    // ===== PATTERN ANALYSIS =====
+    class SmartSignalAnalyzer {
+        constructor() {
+            this.patterns = {
+                repeating: /(\d)\1{2,}/g,
+                sequential: /(?:012|123|234|345|456|567|678|789|987|876|765|654|543|432|321|210)/g,
+                alternating: /(\d)(\d)\1\2/g
+            };
+        }
+
+        getLastDigits(prices, count) {
+            count = count || 100;
+            return prices.slice(-count).map(function(price) {
+                return parseInt(price.toString().split('.').pop().slice(-1));
+            });
+        }
+
+        detectPatterns(digits) {
+            const digitString = digits.join('');
+            const foundPatterns = [];
+
+            // Check for repeating patterns
+            const repeating = digitString.match(this.patterns.repeating);
+            if (repeating) {
+                const self = this;
+                repeating.forEach(function(pattern) {
+                    foundPatterns.push({
+                        type: 'repeating',
+                        pattern: pattern,
+                        digit: pattern[0],
+                        recommendation: self.getRepeatingRecommendation(pattern[0], pattern.length),
+                        confidence: Math.min(95, 50 + (pattern.length * 15))
+                    });
+                });
+            }
+
+            return foundPatterns;
+        }
+
+        analyzeDominance(digits) {
+            const counts = new Array(10).fill(0);
+            digits.forEach(function(digit) {
+                counts[digit]++;
+            });
+            
+            const total = digits.length;
+            const percentages = counts.map(function(count) {
+                return (count / total) * 100;
+            });
+            
+            const maxPercentage = Math.max.apply(Math, percentages);
+            const dominantDigit = percentages.indexOf(maxPercentage);
+            
+            const recommendations = [];
+
+            if (maxPercentage > 15) {
+                recommendations.push({
+                    type: 'dominant_digit',
+                    digit: dominantDigit,
+                    percentage: maxPercentage.toFixed(1),
+                    recommendation: `Trade MATCHES digit ${dominantDigit}`,
+                    reason: `Digit ${dominantDigit} appears ${maxPercentage.toFixed(1)}% of the time`,
+                    confidence: Math.min(95, Math.max(50, 50 + ((maxPercentage - 15) / 25) * 45))
+                });
+            }
+
+            // Over/Under analysis
+            const highDigits = [7, 8, 9];
+            const lowDigits = [0, 1, 2];
+            
+            const highPercentage = highDigits.reduce(function(sum, digit) {
+                return sum + percentages[digit];
+            }, 0);
+            
+            const lowPercentage = lowDigits.reduce(function(sum, digit) {
+                return sum + percentages[digit];
+            }, 0);
+
+            if (highPercentage < 25) {
+                recommendations.push({
+                    type: 'over_under',
+                    recommendation: 'Trade OVER 6',
+                    reason: `High digits (7,8,9) only ${highPercentage.toFixed(1)}% - expect rebound`,
+                    confidence: Math.min(95, Math.max(50, 50 + ((30 - highPercentage) / 30) * 45))
+                });
+            }
+
+            if (lowPercentage < 25) {
+                recommendations.push({
+                    type: 'over_under',
+                    recommendation: 'Trade UNDER 3',
+                    reason: `Low digits (0,1,2) only ${lowPercentage.toFixed(1)}% - expect rebound`,
+                    confidence: Math.min(95, Math.max(50, 50 + ((30 - lowPercentage) / 30) * 45))
+                });
+            }
+
+            return recommendations;
+        }
+
+        analyzeTrend(prices) {
+            const recommendations = [];
+            
+            if (prices.length < 20) return recommendations;
+            
+            const shortTerm = this.calculateTrend(prices.slice(-20));
+            const mediumTerm = this.calculateTrend(prices.slice(-50));
+            
+            if (shortTerm.direction === mediumTerm.direction && shortTerm.direction !== 'neutral') {
+                recommendations.push({
+                    type: 'trend_alignment',
+                    recommendation: shortTerm.direction === 'up' ? 'Trade RISE' : 'Trade FALL',
+                    reason: `Short and medium term trends aligned ${shortTerm.direction}ward`,
+                    confidence: 75
+                });
+            }
+
+            return recommendations;
+        }
+
+        calculateTrend(prices) {
+            if (prices.length < 2) return { direction: 'neutral', strength: 0 };
+            
+            let upMoves = 0;
+            let downMoves = 0;
+
+            for (let i = 1; i < prices.length; i++) {
+                const change = prices[i] - prices[i - 1];
+                if (change > 0) upMoves++;
+                else if (change < 0) downMoves++;
+            }
+
+            const upPercentage = (upMoves / (prices.length - 1)) * 100;
+            const direction = upPercentage > 55 ? 'up' : upPercentage < 45 ? 'down' : 'neutral';
+            const strength = Math.abs(upPercentage - 50);
+
+            return { direction: direction, strength: strength, upPercentage: upPercentage };
+        }
+
+        getRepeatingRecommendation(digit, length) {
+            if (length >= 4) {
+                return `Strong pattern detected! Trade MATCHES digit ${digit}`;
+            } else if (length === 3) {
+                return `Trade DIFFERS from digit ${digit} (pattern may break)`;
+            }
+            return `Watch digit ${digit}`;
+        }
+    }
+
+    // Initialize analyzer
+    const analyzer = new SmartSignalAnalyzer();
+
+    // Generate smart signals
+    function generateSmartSignals(market) {
+        const prices = ticksStorage[market];
+        if (!prices || prices.length < 100) {
+            return [{
+                type: 'insufficient_data',
+                recommendation: 'Collecting data...',
+                reason: 'Need more ticks for analysis',
+                confidence: 0
+            }];
+        }
+
+        const digits = analyzer.getLastDigits(prices, 100);
+        const signals = [];
+
+        // Pattern recognition
+        const patterns = analyzer.detectPatterns(digits);
+        signals.push.apply(signals, patterns);
+
+        // Digit dominance analysis
+        const dominance = analyzer.analyzeDominance(digits);
+        signals.push.apply(signals, dominance);
+
+        // Trend analysis
+        const trends = analyzer.analyzeTrend(prices);
+        signals.push.apply(signals, trends);
+
+        // Sort by confidence
+        return signals.sort(function(a, b) {
+            return (b.confidence || 0) - (a.confidence || 0);
+        });
+    }
+
+    // ===== UI FUNCTIONS =====
+    function updateMarketSelector() {
+        const selector = document.getElementById('marketSelector');
+        if (!selector || availableMarkets.length === 0) return;
+
+        let optionsHTML = '<option value="">Select a Market...</option>';
+        
+        // Group R_ markets (standard volatility indices)
+        const rMarkets = availableMarkets.filter(function(m) {
+            return m.symbol.startsWith('R_') && !m.symbol.includes('1s');
+        });
+        
+        // Group 1s markets (1-second volatility indices)
+        const oneSecondMarkets = availableMarkets.filter(function(m) {
+            return m.symbol.startsWith('R_') && m.symbol.includes('1s');
+        });
+        
+        // Standard Volatility Indices
+        if (rMarkets.length > 0) {
+            optionsHTML += '<optgroup label="📊 Volatility Indices">';
+            rMarkets.forEach(function(market) {
+                const displayName = `Volatility ${market.symbol.replace('R_', '')} Index`;
+                const selected = market.symbol === selectedMarket ? 'selected' : '';
+                optionsHTML += `<option value="${market.symbol}" ${selected}>${displayName}</option>`;
+            });
+            optionsHTML += '</optgroup>';
+        }
+        
+        // 1-Second Volatility Indices
+        if (oneSecondMarkets.length > 0) {
+            optionsHTML += '<optgroup label="⚡ 1-Second Volatility Indices">';
+            oneSecondMarkets.forEach(function(market) {
+                const baseNumber = market.symbol.replace('R_', '').replace('1s', '');
+                const displayName = `Volatility ${baseNumber} (1s) Index`;
+                const selected = market.symbol === selectedMarket ? 'selected' : '';
+                optionsHTML += `<option value="${market.symbol}" ${selected}>${displayName}</option>`;
+            });
+            optionsHTML += '</optgroup>';
+        }
+        
+        // Other synthetic markets
+        const otherMarkets = availableMarkets.filter(function(m) {
+            return !m.symbol.startsWith('R_');
+        });
+        
+        if (otherMarkets.length > 0) {
+            optionsHTML += '<optgroup label="🎯 Other Synthetic Indices">';
+            otherMarkets.forEach(function(market) {
+                const displayName = market.display_name || market.symbol;
+                const selected = market.symbol === selectedMarket ? 'selected' : '';
+                optionsHTML += `<option value="${market.symbol}" ${selected}>${displayName}</option>`;
+            });
+            optionsHTML += '</optgroup>';
+        }
+
+        selector.innerHTML = optionsHTML;
+        logInfo(`🔄 Updated market selector with ${availableMarkets.length} markets`);
+    }
+
+    function displaySignals(signals) {
+        const container = document.getElementById('signalsContainer');
+        if (!container) return;
+
+        if (signals.length === 0) {
+            container.innerHTML = '<div class="no-signals">No strong signals detected. Keep monitoring...</div>';
+            return;
+        }
+
+        let html = '';
+        signals.forEach(function(signal) {
+            const confidenceClass = signal.confidence > 70 ? 'high-confidence' : 
+                                   signal.confidence > 50 ? 'medium-confidence' : 'low-confidence';
+            
+            html += `
+                <div class="signal-card ${confidenceClass}">
+                    <div class="signal-header">
+                        <span class="signal-type">${signal.type.replace('_', ' ').toUpperCase()}</span>
+                        <span class="confidence">${signal.confidence ? signal.confidence.toFixed(0) + '%' : 'N/A'}</span>
+                    </div>
+                    <div class="recommendation">${signal.recommendation}</div>
+                    ${signal.reason ? `<div class="reason">${signal.reason}</div>` : ''}
+                    ${signal.pattern ? `<div class="pattern">Pattern: ${signal.pattern}</div>` : ''}
+                </div>
+            `;
+        });
+        
+        container.innerHTML = html;
+    }
+
+    function getSignals() {
+        if (!selectedMarket) {
+            alert('Please select a market first!');
+            return;
+        }
+        
+        const signals = generateSmartSignals(selectedMarket);
+        currentSignals = signals;
+        displaySignals(signals);
+        
+        // Update market info
+        const marketInfo = document.getElementById('marketInfo');
+        if (marketInfo && ticksStorage[selectedMarket]) {
+            marketInfo.style.display = 'block';
+            const prices = ticksStorage[selectedMarket];
+            const currentPrice = prices[prices.length - 1];
+            const digits = analyzer.getLastDigits(prices, 50);
+            const lastDigit = digits[digits.length - 1];
+            
+            marketInfo.innerHTML = `
+                <div class="market-stats">
+                    <div>Current Price: ${currentPrice}</div>
+                    <div>Last Digit: ${lastDigit}</div>
+                    <div>Data Points: ${prices.length}</div>
+                </div>
+            `;
+        }
+    }
+
+    function subscribeToMarket(symbol) {
+        if (!ticksStorage[symbol] || ticksStorage[symbol].length === 0) {
+            console.log(`📡 Loading data for ${symbol}...`);
+            subscribeTicks(symbol);
+            
+            const container = document.getElementById('signalsContainer');
+            if (container) {
+                container.innerHTML = '<div class="loading">Loading data for ' + symbol + '...</div>';
+            }
+        }
+    }
+
+    // ===== EVENT LISTENERS =====
+    document.addEventListener('DOMContentLoaded', function() {
+        logInfo('📱 DOM loaded, initializing system...');
+        
+        // Initialize WebSocket
+        if (!ws || ws.readyState === WebSocket.CLOSED) {
+            initializeWebSocket();
+        }
+        
+        const marketSelector = document.getElementById('marketSelector');
+        if (marketSelector) {
+            marketSelector.addEventListener('change', function(e) {
+                selectedMarket = e.target.value;
+                if (selectedMarket) {
+                    subscribeToMarket(selectedMarket);
+                    logInfo(`🎯 Selected market: ${selectedMarket}`);
+                }
+            });
+        }
+
+        const getSignalsBtn = document.getElementById('getSignalsBtn');
+        if (getSignalsBtn) {
+            getSignalsBtn.addEventListener('click', getSignals);
+        }
+    });
+
+    // Removed periodic market selector refresh to reduce reflow/repaint overhead
+    logInfo('✅ Smart Signals System loaded successfully');
+  </script>
+</body>
+</html>
