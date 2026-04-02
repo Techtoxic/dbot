@@ -55,8 +55,8 @@ const DTrader: React.FC = () => {
 
         pendingSyncPayloadRef.current = payload;
         setIsTraderStorageReady(false);
-        syncWindow.postMessage({ key: 'clientAccounts', value: clientAccounts }, traderOrigin);
-        syncWindow.postMessage({ key: 'active_loginid', value: activeLoginid }, traderOrigin);
+        syncWindow.postMessage({ key: 'clientAccounts', value: clientAccounts }, '*');
+        syncWindow.postMessage({ key: 'active_loginid', value: activeLoginid }, '*');
     }, [isSyncFrameLoaded]);
 
     useEffect(() => {
