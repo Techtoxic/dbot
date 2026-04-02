@@ -31,7 +31,43 @@ const DTrader: React.FC = () => {
     const [digitStats, setDigitStats] = useState<{ [key: number]: number }>({});
     const [priceHistory, setPriceHistory] = useState<number[]>([]);
     const [activeView, setActiveView] = useState<'dtrader' | 'tradingview'>('dtrader');
-    
+    const traderOrigin = 'https://ddtrader.netlify.app';
+    const syncFrameRef = useRef<HTMLIFrameElement | null>(null);
+    const lastSyncedPayloadRef = useRef('');
+    const [isTraderStorageReady, setIsTraderStorageReady] = useState(false);
+    const [traderFrameVersion, setTraderFrameVersion] = useState(0);
+
+    const syncTraderStorage = useCallback(() => {
+        const syncWindow = syncFrameRef.current?.contentWindow;
+        if (!syncWindow) return;
+
+        const clientAccounts = localStorage.getItem('clientAccounts') ?? '';
+        const activeLoginid = localStorage.getItem('active_loginid') ?? '';
+        const payload = JSON.stringify({ clientAccounts, activeLoginid });
+
+        if (payload === lastSyncedPayloadRef.current) {
+            setIsTraderStorageReady(true);
+            return;
+        }
+
+        syncWindow.postMessage({ key: 'clientAccounts', value: clientAccounts }, traderOrigin);
+        syncWindow.postMessage({ key: 'active_loginid', value: activeLoginid }, traderOrigin);
+
+        lastSyncedPayloadRef.current = payload;
+        setTraderFrameVersion(version => version + 1);
+        setIsTraderStorageReady(true);
+    }, []);
+
+    useEffect(() => {
+        syncTraderStorage();
+
+        const intervalId = window.setInterval(syncTraderStorage, 1000);
+
+        return () => {
+            window.clearInterval(intervalId);
+        };
+    }, [syncTraderStorage]);
+
     const frameUrl = 'https://ddtrader.netlify.app/dtrader';
 
     return (
@@ -57,8 +93,26 @@ const DTrader: React.FC = () => {
                     boxShadow: 'none',
                 }}
             >
+                    <iframe
+                        ref={syncFrameRef}
+                        src={`${traderOrigin}/localstorage-sync.html`}
+                        title='DTrader storage sync'
+                        loading='eager'
+                        onLoad={syncTraderStorage}
+                        aria-hidden='true'
+                        tabIndex={-1}
+                        style={{
+                            position: 'absolute',
+                            width: 0,
+                            height: 0,
+                            border: 0,
+                            opacity: 0,
+                            pointerEvents: 'none',
+                        }}
+                    />
                 <iframe
-                    src={frameUrl}
+                        key={traderFrameVersion}
+                        src={isTraderStorageReady ? frameUrl : 'about:blank'}
                     title='Custom DTrader'
                     loading='eager'
                     allowFullScreen
