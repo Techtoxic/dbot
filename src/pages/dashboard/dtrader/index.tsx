@@ -33,12 +33,15 @@ const DTrader: React.FC = () => {
     const [activeView, setActiveView] = useState<'dtrader' | 'tradingview'>('dtrader');
     const traderOrigin = 'https://ddtrader.netlify.app';
     const syncFrameRef = useRef<HTMLIFrameElement | null>(null);
+    const [isSyncFrameLoaded, setIsSyncFrameLoaded] = useState(false);
     const pendingSyncPayloadRef = useRef('');
     const lastSyncedPayloadRef = useRef('');
     const [isTraderStorageReady, setIsTraderStorageReady] = useState(false);
     const [traderFrameVersion, setTraderFrameVersion] = useState(0);
 
     const syncTraderStorage = useCallback(() => {
+        if (!isSyncFrameLoaded) return;
+
         const syncWindow = syncFrameRef.current?.contentWindow;
         if (!syncWindow) return;
 
@@ -54,7 +57,7 @@ const DTrader: React.FC = () => {
         setIsTraderStorageReady(false);
         syncWindow.postMessage({ key: 'clientAccounts', value: clientAccounts }, traderOrigin);
         syncWindow.postMessage({ key: 'active_loginid', value: activeLoginid }, traderOrigin);
-    }, []);
+    }, [isSyncFrameLoaded]);
 
     useEffect(() => {
         const handleTraderSyncReady = (event: MessageEvent) => {
@@ -115,7 +118,10 @@ const DTrader: React.FC = () => {
                         src={`${traderOrigin}/localstorage-sync.html`}
                         title='DTrader storage sync'
                         loading='eager'
-                        onLoad={syncTraderStorage}
+                        onLoad={() => {
+                            setIsSyncFrameLoaded(true);
+                            syncTraderStorage();
+                        }}
                         aria-hidden='true'
                         tabIndex={-1}
                         style={{
