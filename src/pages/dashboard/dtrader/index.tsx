@@ -33,6 +33,7 @@ const DTrader: React.FC = () => {
     const [activeView, setActiveView] = useState<'dtrader' | 'tradingview'>('dtrader');
     const traderOrigin = 'https://ddtrader.netlify.app';
     const syncFrameRef = useRef<HTMLIFrameElement | null>(null);
+    const pendingSyncPayloadRef = useRef('');
     const lastSyncedPayloadRef = useRef('');
     const [isTraderStorageReady, setIsTraderStorageReady] = useState(false);
     const [traderFrameVersion, setTraderFrameVersion] = useState(0);
@@ -45,17 +46,33 @@ const DTrader: React.FC = () => {
         const activeLoginid = localStorage.getItem('active_loginid') ?? '';
         const payload = JSON.stringify({ clientAccounts, activeLoginid });
 
-        if (payload === lastSyncedPayloadRef.current) {
-            setIsTraderStorageReady(true);
+        if (payload === lastSyncedPayloadRef.current || payload === pendingSyncPayloadRef.current) {
             return;
         }
 
+        pendingSyncPayloadRef.current = payload;
+        setIsTraderStorageReady(false);
         syncWindow.postMessage({ key: 'clientAccounts', value: clientAccounts }, traderOrigin);
         syncWindow.postMessage({ key: 'active_loginid', value: activeLoginid }, traderOrigin);
+    }, []);
 
-        lastSyncedPayloadRef.current = payload;
-        setTraderFrameVersion(version => version + 1);
-        setIsTraderStorageReady(true);
+    useEffect(() => {
+        const handleTraderSyncReady = (event: MessageEvent) => {
+            if (event.origin !== traderOrigin) return;
+            if (event.data?.key !== 'localstorage-sync-ready') return;
+            if (event.data?.value !== pendingSyncPayloadRef.current) return;
+
+            lastSyncedPayloadRef.current = event.data.value;
+            pendingSyncPayloadRef.current = '';
+            setIsTraderStorageReady(true);
+            setTraderFrameVersion(version => version + 1);
+        };
+
+        window.addEventListener('message', handleTraderSyncReady);
+
+        return () => {
+            window.removeEventListener('message', handleTraderSyncReady);
+        };
     }, []);
 
     useEffect(() => {
