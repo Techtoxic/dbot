@@ -47,7 +47,16 @@ const DTrader: React.FC = () => {
 
         const clientAccounts = localStorage.getItem('clientAccounts') ?? '';
         const activeLoginid = localStorage.getItem('active_loginid') ?? '';
-        const payload = JSON.stringify({ clientAccounts, activeLoginid });
+        const activeWalletLoginid = localStorage.getItem('active_wallet_loginid') ?? '';
+        const authToken = localStorage.getItem('authToken') ?? '';
+        const accountsList = localStorage.getItem('accountsList') ?? '';
+        const payload = JSON.stringify({
+            clientAccounts,
+            activeLoginid,
+            activeWalletLoginid,
+            authToken,
+            accountsList,
+        });
 
         if (payload === lastSyncedPayloadRef.current || payload === pendingSyncPayloadRef.current) {
             return;
@@ -57,6 +66,9 @@ const DTrader: React.FC = () => {
         setIsTraderStorageReady(false);
         syncWindow.postMessage({ key: 'clientAccounts', value: clientAccounts }, '*');
         syncWindow.postMessage({ key: 'active_loginid', value: activeLoginid }, '*');
+        syncWindow.postMessage({ key: 'active_wallet_loginid', value: activeWalletLoginid }, '*');
+        syncWindow.postMessage({ key: 'authToken', value: authToken }, '*');
+        syncWindow.postMessage({ key: 'accountsList', value: accountsList }, '*');
     }, [isSyncFrameLoaded]);
 
     useEffect(() => {
