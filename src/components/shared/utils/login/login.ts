@@ -16,7 +16,7 @@ export const redirectToLogin = () => {
     console.log('- App ID: 85159');
 
     // Construct the OAuth URL with proper redirect_uri
-    const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=85159&response_type=token&scope=read,trade&l=EN&brand=waited&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=85159&response_type=token&scope=read,trade,admin&l=EN&brand=waited&redirect_uri=${encodeURIComponent(redirectUri)}`;
 
     console.log('🔐 Full OAuth URL:', oauthUrl);
     console.log('🚀 Redirecting to OAuth...');
