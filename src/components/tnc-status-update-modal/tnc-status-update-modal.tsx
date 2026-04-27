@@ -36,18 +36,35 @@ const TncStatusUpdateModal: React.FC = observer(() => {
         setIsSubmitting(true);
 
         try {
+            const active_loginid = localStorage.getItem('active_loginid') ?? '';
+            const accounts_list = JSON.parse(localStorage.getItem('accountsList') ?? '{}') as Record<string, string>;
+            const active_token = active_loginid ? accounts_list[active_loginid] : '';
+
+            if (active_token && localStorage.getItem('authToken') !== active_token) {
+                localStorage.setItem('authToken', active_token);
+                await api_base.init(true);
+            }
+
             if (!api_base.api) {
                 await api_base.init();
             }
 
             if (!api_base.api) return;
 
-            const approval_response = await (api_base.api.send as (payload: { tnc_approval: string }) => Promise<{
-                error?: { message?: string };
-            }>)({ tnc_approval: '1' });
+            const submit_approval = () =>
+                (api_base.api?.send as (payload: { tnc_approval: string }) => Promise<{
+                    error?: { code?: string; message?: string };
+                }>)({ tnc_approval: '1' });
+
+            let approval_response = await submit_approval();
+
+            if (approval_response?.error?.code === 'InvalidToken' || approval_response?.error?.code === 'AuthorizationRequired') {
+                await api_base.init(true);
+                approval_response = await submit_approval();
+            }
 
             if (approval_response?.error) {
-                throw new Error(approval_response.error.message || 'T&C approval request failed');
+                throw approval_response.error;
             }
 
             setIsTncAcknowledged(true);
@@ -59,8 +76,13 @@ const TncStatusUpdateModal: React.FC = observer(() => {
             } catch (settings_error) {
                 console.warn('T&C approved but failed to refresh settings', settings_error);
             }
-        } catch (error) {
-            console.error('Failed to submit T&C approval', error);
+        } catch (error: unknown) {
+            const api_error = error as { code?: string; message?: string };
+            console.error('Failed to submit T&C approval', {
+                code: api_error?.code,
+                message: api_error?.message,
+                raw: error,
+            });
         } finally {
             setIsSubmitting(false);
         }
