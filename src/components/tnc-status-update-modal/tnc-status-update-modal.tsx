@@ -31,16 +31,34 @@ const TncStatusUpdateModal: React.FC = observer(() => {
     }, [loginid]);
 
     const onClick = async () => {
-        if (is_submitting || !api_base?.api) return;
+        if (is_submitting) return;
 
         setIsSubmitting(true);
 
         try {
-            await api_base.api.send({ tnc_approval: '1' });
-            const settings_response = await api_base.api.getSettings();
-            client.setAccountSettings(settings_response.get_settings);
+            if (!api_base.api) {
+                await api_base.init();
+            }
+
+            if (!api_base.api) return;
+
+            const approval_response = await (api_base.api.send as (payload: { tnc_approval: string }) => Promise<{
+                error?: { message?: string };
+            }>)({ tnc_approval: '1' });
+
+            if (approval_response?.error) {
+                throw new Error(approval_response.error.message || 'T&C approval request failed');
+            }
+
             setIsTncAcknowledged(true);
             setIsTncOpen(false);
+
+            try {
+                const settings_response = await api_base.api.getSettings();
+                client.setAccountSettings(settings_response.get_settings);
+            } catch (settings_error) {
+                console.warn('T&C approved but failed to refresh settings', settings_error);
+            }
         } catch (error) {
             console.error('Failed to submit T&C approval', error);
         } finally {
