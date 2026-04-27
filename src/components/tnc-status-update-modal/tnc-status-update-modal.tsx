@@ -30,6 +30,55 @@ const TncStatusUpdateModal: React.FC = observer(() => {
         setIsTncAcknowledged(false);
     }, [loginid]);
 
+    const sendTncApproval = async (): Promise<{ error?: { code?: string; message?: string } }> => {
+        const connection = api_base.api?.connection as WebSocket | undefined;
+
+        if (!connection || connection.readyState !== WebSocket.OPEN) {
+            throw new Error('WebSocket connection is not ready');
+        }
+
+        const req_id = Date.now();
+
+        return new Promise((resolve, reject) => {
+            const timeout = window.setTimeout(() => {
+                cleanup();
+                reject(new Error('T&C approval request timed out'));
+            }, 10000);
+
+            const cleanup = () => {
+                window.clearTimeout(timeout);
+                connection.removeEventListener('message', onMessage);
+                connection.removeEventListener('error', onError);
+            };
+
+            const onError = () => {
+                cleanup();
+                reject(new Error('WebSocket error while submitting T&C approval'));
+            };
+
+            const onMessage = (event: MessageEvent) => {
+                try {
+                    const data = JSON.parse(event.data) as {
+                        req_id?: number;
+                        msg_type?: string;
+                        error?: { code?: string; message?: string };
+                    };
+
+                    if (data.req_id !== req_id || data.msg_type !== 'tnc_approval') return;
+
+                    cleanup();
+                    resolve(data);
+                } catch {
+                    // Ignore unrelated/non-JSON socket payloads.
+                }
+            };
+
+            connection.addEventListener('message', onMessage);
+            connection.addEventListener('error', onError);
+            connection.send(JSON.stringify({ tnc_approval: 1, req_id }));
+        });
+    };
+
     const onClick = async () => {
         if (is_submitting) return;
 
@@ -51,16 +100,11 @@ const TncStatusUpdateModal: React.FC = observer(() => {
 
             if (!api_base.api) return;
 
-            const submit_approval = () =>
-                (api_base.api?.send as (payload: { tnc_approval: string }) => Promise<{
-                    error?: { code?: string; message?: string };
-                }>)({ tnc_approval: '1' });
-
-            let approval_response = await submit_approval();
+            let approval_response = await sendTncApproval();
 
             if (approval_response?.error?.code === 'InvalidToken' || approval_response?.error?.code === 'AuthorizationRequired') {
                 await api_base.init(true);
-                approval_response = await submit_approval();
+                approval_response = await sendTncApproval();
             }
 
             if (approval_response?.error) {
