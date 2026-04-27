@@ -37,6 +37,7 @@ const DTrader: React.FC = () => {
     const pendingSyncPayloadRef = useRef('');
     const lastSyncedPayloadRef = useRef('');
     const [isTraderStorageReady, setIsTraderStorageReady] = useState(false);
+    const [hasSyncTimedOut, setHasSyncTimedOut] = useState(false);
     const [traderFrameVersion, setTraderFrameVersion] = useState(0);
 
     const syncTraderStorage = useCallback(() => {
@@ -63,13 +64,15 @@ const DTrader: React.FC = () => {
         }
 
         pendingSyncPayloadRef.current = payload;
-        setIsTraderStorageReady(false);
+        if (!hasSyncTimedOut) {
+            setIsTraderStorageReady(false);
+        }
         syncWindow.postMessage({ key: 'clientAccounts', value: clientAccounts }, '*');
         syncWindow.postMessage({ key: 'active_loginid', value: activeLoginid }, '*');
         syncWindow.postMessage({ key: 'active_wallet_loginid', value: activeWalletLoginid }, '*');
         syncWindow.postMessage({ key: 'authToken', value: authToken }, '*');
         syncWindow.postMessage({ key: 'accountsList', value: accountsList }, '*');
-    }, [isSyncFrameLoaded]);
+    }, [hasSyncTimedOut, isSyncFrameLoaded]);
 
     useEffect(() => {
         const handleTraderSyncReady = (event: MessageEvent) => {
@@ -91,6 +94,18 @@ const DTrader: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        if (!isSyncFrameLoaded || isTraderStorageReady) return;
+
+        const timeoutId = window.setTimeout(() => {
+            setHasSyncTimedOut(true);
+        }, 4000);
+
+        return () => {
+            window.clearTimeout(timeoutId);
+        };
+    }, [isSyncFrameLoaded, isTraderStorageReady]);
+
+    useEffect(() => {
         syncTraderStorage();
 
         const intervalId = window.setInterval(syncTraderStorage, 1000);
@@ -101,6 +116,7 @@ const DTrader: React.FC = () => {
     }, [syncTraderStorage]);
 
     const frameUrl = 'https://ddtrader.netlify.app/dtrader';
+    const shouldRenderDTraderFrame = isTraderStorageReady || hasSyncTimedOut;
 
     return (
         <div
@@ -147,7 +163,7 @@ const DTrader: React.FC = () => {
                     />
                 <iframe
                         key={traderFrameVersion}
-                        src={isTraderStorageReady ? frameUrl : 'about:blank'}
+                    src={shouldRenderDTraderFrame ? frameUrl : 'about:blank'}
                     title='Custom DTrader'
                     loading='eager'
                     allowFullScreen
