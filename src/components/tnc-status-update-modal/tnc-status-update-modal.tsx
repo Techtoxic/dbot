@@ -1,7 +1,6 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { api_base } from '@/external/bot-skeleton/services/api/api-base';
-import { useApiBase } from '@/hooks/useApiBase';
 import useIsTNCNeeded from '@/hooks/useIsTNCNeeded';
 import { useStore } from '@/hooks/useStore';
 import { Button, Link, Text } from '@deriv-com/quill-ui';
@@ -11,23 +10,41 @@ import Modal from '../shared_ui/modal';
 import './tnc-status-update-modal.scss';
 
 const TncStatusUpdateModal: React.FC = observer(() => {
-    const { isAuthorized } = useApiBase();
     const { client } = useStore();
-    const { is_cr_account } = client;
+    const { is_cr_account, loginid } = client;
     const [is_tnc_open, setIsTncOpen] = React.useState(false);
+    const [is_submitting, setIsSubmitting] = React.useState(false);
+    const [is_tnc_acknowledged, setIsTncAcknowledged] = React.useState(false);
     const { isDesktop } = useDevice();
     const is_tnc_needed = useIsTNCNeeded();
 
     React.useEffect(() => {
-        if (is_tnc_needed) {
+        if (is_tnc_needed && !is_tnc_acknowledged) {
             setIsTncOpen(true);
+        } else if (!is_tnc_needed) {
+            setIsTncOpen(false);
         }
-    }, [is_tnc_needed]);
+    }, [is_tnc_acknowledged, is_tnc_needed]);
+
+    React.useEffect(() => {
+        setIsTncAcknowledged(false);
+    }, [loginid]);
 
     const onClick = async () => {
-        if (isAuthorized) {
-            await api_base.api.send({ tnc_approval: 1 });
+        if (is_submitting || !api_base?.api) return;
+
+        setIsSubmitting(true);
+
+        try {
+            await api_base.api.send({ tnc_approval: '1' });
+            const settings_response = await api_base.api.getSettings();
+            client.setAccountSettings(settings_response.get_settings);
+            setIsTncAcknowledged(true);
             setIsTncOpen(false);
+        } catch (error) {
+            console.error('Failed to submit T&C approval', error);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -59,6 +76,7 @@ const TncStatusUpdateModal: React.FC = observer(() => {
                         onClick={onClick}
                         size='md'
                         variant='primary'
+                        disabled={is_submitting}
                         label={<Localize i18n_default_text='Continue' />}
                     />
                 </div>
