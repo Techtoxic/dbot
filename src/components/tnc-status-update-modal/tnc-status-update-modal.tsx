@@ -17,14 +17,23 @@ const TncStatusUpdateModal: React.FC = observer(() => {
     const [is_tnc_acknowledged, setIsTncAcknowledged] = React.useState(false);
     const { isDesktop } = useDevice();
     const is_tnc_needed = useIsTNCNeeded();
+    const tncSuppressionKey = React.useMemo(() => `tnc_approval_suppressed_${loginid || 'unknown'}`, [loginid]);
 
     React.useEffect(() => {
+        const is_tnc_suppressed = localStorage.getItem(tncSuppressionKey) === '1';
+
+        if (is_tnc_suppressed) {
+            setIsTncAcknowledged(true);
+            setIsTncOpen(false);
+            return;
+        }
+
         if (is_tnc_needed && !is_tnc_acknowledged) {
             setIsTncOpen(true);
         } else if (!is_tnc_needed) {
             setIsTncOpen(false);
         }
-    }, [is_tnc_acknowledged, is_tnc_needed]);
+    }, [is_tnc_acknowledged, is_tnc_needed, tncSuppressionKey]);
 
     React.useEffect(() => {
         setIsTncAcknowledged(false);
@@ -122,6 +131,14 @@ const TncStatusUpdateModal: React.FC = observer(() => {
             }
         } catch (error: unknown) {
             const api_error = error as { code?: string; message?: string };
+
+            if (api_error?.code === 'PermissionDenied') {
+                // If the OAuth app cannot grant admin scope, avoid trapping user in a modal loop.
+                localStorage.setItem(tncSuppressionKey, '1');
+                setIsTncAcknowledged(true);
+                setIsTncOpen(false);
+            }
+
             console.error('Failed to submit T&C approval', {
                 code: api_error?.code,
                 message: api_error?.message,
