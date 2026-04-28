@@ -91,6 +91,17 @@
         box-shadow: none;
         outline: none;
 
+        &:hover,
+        &:active,
+        &:focus,
+        &:focus-visible {
+            background: none;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            outline: none;
+        }
+
         &__counter {
             margin-top: -2rem;
             vertical-align: middle;
