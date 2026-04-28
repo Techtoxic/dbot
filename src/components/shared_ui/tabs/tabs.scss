@@ -143,6 +143,14 @@
     &__active {
         font-weight: 700;
         color: var(--text-prominent);
+        display: inline;
+        border: none;
+        border-radius: 0;
+        background: none;
+        padding: 0;
+        margin: 0;
+        box-shadow: none;
+        outline: none;
     }
 
     &__active-line {
