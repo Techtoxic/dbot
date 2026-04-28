@@ -86,9 +86,9 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border: 1px solid var(--general-section-1) !important;
+        border: 1px solid var(--general-section-3) !important;
         border-radius: 6px !important;
-        background: var(--general-section-1) !important;
+        background: var(--general-section-4) !important;
         padding: 6px 12px;
         margin: 0;
         box-shadow: none !important;
@@ -98,8 +98,8 @@
         &:active,
         &:focus,
         &:focus-visible {
-            background: var(--general-section-1) !important;
-            border: 1px solid var(--general-section-1) !important;
+            background: var(--general-section-4) !important;
+            border: 1px solid var(--general-section-3) !important;
             border-radius: 6px !important;
             box-shadow: none !important;
             outline: none !important;
