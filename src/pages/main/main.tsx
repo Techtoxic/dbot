@@ -684,22 +684,8 @@ const AppWrapper = observer(() => {
                                 <h2 className='free-bots__heading'>
                                     <Localize i18n_default_text='Free Bots' />
                                 </h2>
-                                <div
-                                    className='free-bots__content-wrapper'
-                                    style={{ maxWidth: '1100px', margin: '0 auto' }}
-                                >
-                                    <ul
-                                        className='free-bots__content'
-                                        style={{
-                                            display: 'flex',
-                                            flexWrap: 'wrap',
-                                            alignItems: 'stretch',
-                                            gap: '14px',
-                                            listStyle: 'none',
-                                            padding: 0,
-                                            margin: 0,
-                                        }}
-                                    >
+                                <div className='free-bots__content-wrapper'>
+                                    <ul className='free-bots__content'>
                                         {bots.map((bot, index) => (
                                             <li
                                                 className='free-bot'
@@ -707,50 +693,15 @@ const AppWrapper = observer(() => {
                                                 onClick={() => {
                                                     handleBotClick(bot);
                                                 }}
-                                                style={{
-                                                    padding: '12px 14px',
-                                                    borderRadius: '8px',
-                                                    border: '1px solid #e6e9e9',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '10px',
-                                                    cursor: 'pointer',
-                                                    background: '#fff',
-                                                    width: 'clamp(200px, 30vw, 260px)',
-                                                    minHeight: '68px',
-                                                    boxShadow: '0 1px 2px rgb(0 0 0 / 6%)',
-                                                    transition: 'transform 0.15s ease, box-shadow 0.15s ease',
-                                                }}
                                             >
-                                                <div style={{ width: 34, height: 34, flexShrink: 0 }}>
+                                                <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginBottom: 8 }}>
                                                     <BotIcon />
                                                 </div>
-                                                <div
-                                                    className='free-bot__details'
-                                                    style={{ overflow: 'hidden', flex: 1 }}
-                                                >
-                                                    <h3
-                                                        className='free-bot__title'
-                                                        style={{
-                                                            fontSize: '1rem',
-                                                            margin: 0,
-                                                            whiteSpace: 'nowrap',
-                                                            textOverflow: 'ellipsis',
-                                                            overflow: 'hidden',
-                                                        }}
-                                                    >
+                                                <div className='free-bot__details'>
+                                                    <h3 className='free-bot__title'>
                                                         {bot.title}
                                                     </h3>
-                                                    <div
-                                                        style={{
-                                                            fontSize: '0.78rem',
-                                                            color: '#666',
-                                                            marginTop: 4,
-                                                            whiteSpace: 'nowrap',
-                                                            textOverflow: 'ellipsis',
-                                                            overflow: 'hidden',
-                                                        }}
-                                                    >
+                                                    <div className='free-bot__description'>
                                                         Quick-load XML
                                                     </div>
                                                 </div>
