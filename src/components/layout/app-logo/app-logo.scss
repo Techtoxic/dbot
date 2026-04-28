@@ -13,6 +13,13 @@
         &:hover {
             opacity: 0.8;
         }
+
+        @media (max-width: 767px) {
+            padding-inline-start: 0.8rem;
+            padding-inline-end: 0.8rem;
+            border-inline-end: none;
+            height: 28px;
+        }
     }
 }
 
@@ -20,6 +27,13 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    font-weight: 700;
+}
+
+.calebtrading-hub-logo-mobile {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-weight: 700;
 }
 
@@ -38,6 +52,22 @@
     box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
 }
 
+.logo-icon-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+    color: white;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    box-shadow: 0 1px 6px rgba(34, 197, 94, 0.3);
+    flex-shrink: 0;
+}
+
 .logo-text {
     display: flex;
     flex-direction: column;
@@ -45,10 +75,24 @@
     line-height: 1.2;
 }
 
+.logo-text-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    line-height: 1;
+}
+
 .logo-main {
     font-size: 13px;
     color: #22c55e;
     letter-spacing: 0.3px;
+}
+
+.logo-main-mobile {
+    font-size: 11px;
+    color: #22c55e;
+    letter-spacing: 0.2px;
+    font-weight: 800;
 }
 
 .logo-sub {
