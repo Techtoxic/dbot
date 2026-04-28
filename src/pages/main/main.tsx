@@ -694,7 +694,7 @@ const AppWrapper = observer(() => {
                                                     handleBotClick(bot);
                                                 }}
                                             >
-                                                <div style={{ width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginBottom: 8 }}>
+                                                <div style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginBottom: 6 }}>
                                                     <BotIcon />
                                                 </div>
                                                 <div className='free-bot__details'>
