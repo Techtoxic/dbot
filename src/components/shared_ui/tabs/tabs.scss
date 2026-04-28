@@ -83,23 +83,23 @@
         -webkit-touch-callout: none;
         -webkit-tap-highlight-color: transparent;
         display: inline;
-        border: none;
-        border-radius: 0;
-        background: none;
+        border: none !important;
+        border-radius: 0 !important;
+        background: none !important;
         padding: 0;
         margin: 0;
-        box-shadow: none;
-        outline: none;
+        box-shadow: none !important;
+        outline: none !important;
 
         &:hover,
         &:active,
         &:focus,
         &:focus-visible {
-            background: none;
-            border: none;
-            border-radius: 0;
-            box-shadow: none;
-            outline: none;
+            background: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            outline: none !important;
         }
 
         &__counter {
