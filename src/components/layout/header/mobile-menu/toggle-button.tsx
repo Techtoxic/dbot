@@ -6,8 +6,9 @@ type TToggleButton = {
 };
 
 const ToggleButton = ({ onClick }: TToggleButton) => (
-    <button onClick={onClick}>
+    <button className='mobile-menu__toggle-button' onClick={onClick}>
         <LegacyMenuHamburger1pxIcon iconSize='xs' fill='var(--text-general)' />
+        <span className='mobile-menu__toggle-text'>CALEBTRADING HUB</span>
     </button>
 );
 

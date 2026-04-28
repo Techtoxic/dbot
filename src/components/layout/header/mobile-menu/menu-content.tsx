@@ -13,10 +13,6 @@ const MenuContent = observer(() => {
 
     return (
         <div className='mobile-menu__content'>
-            <div className='mobile-menu__content__platform'>
-                <PlatformSwitcher />
-            </div>
-
             <div className='mobile-menu__content__items'>
                 {config.map((item, index) => {
                     const removeBorderBottom = item.find(({ removeBorderBottom }) => removeBorderBottom);

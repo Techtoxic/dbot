@@ -233,8 +233,8 @@ const AppHeader = observer(() => {
             })}
         >
             <Wrapper variant='left'>
-                <AppLogo />
                 <MobileMenu />
+                <AppLogo />
                 <InfoIcon />
             </Wrapper>
             <Wrapper variant='right'>{renderAccountSection()}</Wrapper>
