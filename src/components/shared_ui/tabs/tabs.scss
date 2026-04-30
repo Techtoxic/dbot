@@ -94,6 +94,12 @@
         box-shadow: none !important;
         outline: none !important;
 
+        body.theme--light & {
+            background: #f0f0f0 !important;
+            border: 1px solid #d0d0d0 !important;
+            color: #333 !important;
+        }
+
         &:hover,
         &:active,
         &:focus,
@@ -103,6 +109,11 @@
             border-radius: 6px !important;
             box-shadow: none !important;
             outline: none !important;
+
+            body.theme--light & {
+                background: #e8e8e8 !important;
+                border: 1px solid #999 !important;
+            }
         }
 
         &__counter {
@@ -165,6 +176,11 @@
         margin: 0;
         box-shadow: none;
         outline: none;
+
+        body.theme--light & {
+            color: #0c3d66 !important;
+            font-weight: 700;
+        }
     }
 
     &__active-line {
