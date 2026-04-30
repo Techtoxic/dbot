@@ -6,15 +6,7 @@ import APIMiddleware from './api-middleware';
 
 export const generateDerivApiInstance = () => {
 	// Enforce correct app id for all websocket connections
-	let cleanedAppId = '85159';
-	try {
-		const stored = getAppId?.();
-		if (stored && String(stored) !== '85159') {
-			window.localStorage?.setItem?.('config.app_id', '85159');
-		}
-	} catch (_) {
-		// noop
-	}
+	const cleanedAppId = String(getAppId?.() ?? '338FcRCgkGmDCjc6JoxXw');
 	const socket_url = `wss://ws.derivws.com/websockets/v3?app_id=${cleanedAppId}&l=${getInitialLanguage()}&brand=${website_name.toLowerCase()}`;
 	const deriv_socket = new WebSocket(socket_url);
 	const deriv_api = new DerivAPIBasic({

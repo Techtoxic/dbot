@@ -1,15 +1,17 @@
 import { LocalStorageConstants, LocalStorageUtils, URLUtils } from '@deriv-com/utils';
 
+export const CURRENT_APP_ID = '338FcRCgkGmDCjc6JoxXw';
+
 export const APP_IDS = {
-    LOCALHOST: 85159, // App ID
-    TMP_STAGING: 85159, // App ID
-    STAGING: 85159,
-    STAGING_BE: 85159,
-    STAGING_ME: 85159,
-    PRODUCTION: 85159, // App ID
-    PRODUCTION_BE: 85159,
-    PRODUCTION_ME: 85159,
-    LIVE: 85159, // App ID
+    LOCALHOST: CURRENT_APP_ID,
+    TMP_STAGING: CURRENT_APP_ID,
+    STAGING: CURRENT_APP_ID,
+    STAGING_BE: CURRENT_APP_ID,
+    STAGING_ME: CURRENT_APP_ID,
+    PRODUCTION: CURRENT_APP_ID,
+    PRODUCTION_BE: CURRENT_APP_ID,
+    PRODUCTION_ME: CURRENT_APP_ID,
+    LIVE: CURRENT_APP_ID,
 };
 
 export const livechat_license_id = 12049137;
@@ -76,10 +78,10 @@ export const getAppId = () => {
     let app_id = window.localStorage.getItem('config.app_id');
 
     // Force the correct app ID if it's wrong or missing
-    if (!app_id || app_id === '69811' || app_id === '96171' || app_id !== '85159') {
+    if (!app_id || app_id === '69811' || app_id === '96171' || app_id !== CURRENT_APP_ID) {
         console.warn("⚠️ App ID is invalid or outdated, forcing correct App ID...");
-        console.log("🔄 Old App ID:", app_id, "-> New App ID: 85159");
-        app_id = '85159'; // Updated to use your app ID
+        console.log("🔄 Old App ID:", app_id, "-> New App ID:", CURRENT_APP_ID);
+        app_id = CURRENT_APP_ID;
         window.localStorage.setItem('config.app_id', app_id);
     }
 
@@ -120,12 +122,12 @@ export const getDebugServiceWorker = () => !!parseInt(window.localStorage.getIte
 // Force clear old app ID and set correct one
 export const forceCorrectAppId = () => {
     const currentAppId = window.localStorage.getItem('config.app_id');
-    if (currentAppId !== '85159') {
+    if (currentAppId !== CURRENT_APP_ID) {
         console.log("🔄 Forcing correct App ID update...");
         console.log("🗑️ Clearing old App ID:", currentAppId);
         window.localStorage.removeItem('config.app_id');
-        window.localStorage.setItem('config.app_id', '85159');
-        console.log("✅ Set new App ID: 85159");
+        window.localStorage.setItem('config.app_id', CURRENT_APP_ID);
+        console.log("✅ Set new App ID:", CURRENT_APP_ID);
     }
 };
 

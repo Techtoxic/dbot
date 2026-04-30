@@ -3,6 +3,8 @@
  * Handles all copy trading operations with Deriv API
  */
 
+import { getAppId } from '@/components/shared';
+
 export interface DerivAccount {
     account_id: string;
     account_type: 'demo' | 'real';
@@ -48,7 +50,7 @@ export interface TradeSignal {
 
 class DerivCopyTradingService {
     private apiUrl = 'https://api.deriv.com';
-    private appId = '85159'; // Your Deriv app ID
+    private appId = getAppId();
     private wsConnection: WebSocket | null = null;
     private isConnected = false;
     private copyTradingEnabled = false;

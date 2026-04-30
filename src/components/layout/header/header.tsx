@@ -2,6 +2,7 @@ import { useState } from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 import { standalone_routes } from '@/components/shared';
+import { getAppId } from '@/components/shared';
 import Button from '@/components/shared_ui/button';
 import Modal from '@/components/shared_ui/modal';
 import useActiveAccount from '@/hooks/api/account/useActiveAccount';
@@ -205,7 +206,7 @@ const AppHeader = observer(() => {
                         const redirectUri = `${currentOrigin}/callback`;
 
                         // Construct the OAuth URL with proper redirect_uri
-                        const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=85159&response_type=token&scope=read,trade,admin&l=EN&brand=waited&redirect_uri=${encodeURIComponent(redirectUri)}`;
+                        const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${getAppId()}&response_type=token&scope=read,trade,admin&l=EN&brand=waited&redirect_uri=${encodeURIComponent(redirectUri)}`;
 
                         console.log('🔐 Header login redirecting to OAuth with redirect_uri:', redirectUri);
                         window.location.replace(oauthUrl);
