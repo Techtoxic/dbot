@@ -1,7 +1,7 @@
 import { LocalStorageConstants, LocalStorageUtils, URLUtils } from '@deriv-com/utils';
 
-// app_id=85159 is the working App ID for this deployment
-export const CURRENT_APP_ID = '85159';
+// app_id=133723 is registered for dbotke.netlify.app with scopes: read, trade
+export const CURRENT_APP_ID = '133723';
 
 export const APP_IDS = {
     LOCALHOST: CURRENT_APP_ID,
@@ -80,7 +80,7 @@ export const getAppId = () => {
     let app_id = window.localStorage.getItem('config.app_id');
 
     // Force the correct app ID if it's wrong or missing
-    if (!app_id || app_id === '69811' || app_id === '96171' || app_id === '133723' || app_id !== CURRENT_APP_ID) {
+    if (!app_id || app_id === '69811' || app_id === '96171' || app_id === '85159' || app_id !== CURRENT_APP_ID) {
         console.warn("⚠️ App ID is invalid or outdated, forcing correct App ID...");
         console.log("🔄 Old App ID:", app_id, "-> New App ID:", CURRENT_APP_ID);
         app_id = CURRENT_APP_ID;

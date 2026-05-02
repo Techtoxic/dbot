@@ -27,7 +27,7 @@ function initializeWebSocket() {
     }
     isConnecting = true;
     try {
-        ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=85159');
+        ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=133723');
         logInfo('✅ WebSocket connection initiated');
         
         ws.onopen = function() {
