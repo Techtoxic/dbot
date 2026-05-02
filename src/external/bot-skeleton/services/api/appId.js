@@ -4,7 +4,8 @@ import { getInitialLanguage } from '@deriv-com/translations';
 import APIMiddleware from './api-middleware';
 
 export const generateDerivApiInstance = () => {
-        const cleanedAppId = '338FcRCgkGmDCjc6JoxXw';
+        // Use numeric app_id (85159) for WebSocket — the alphanumeric OAuth2 client_id is ONLY for the OAuth login URL
+        const cleanedAppId = getAppId();
         // brand must be 'deriv' — Deriv's WebSocket server does not accept custom brand names
         const socket_url = `wss://ws.derivws.com/websockets/v3?app_id=${cleanedAppId}&l=${getInitialLanguage()}&brand=deriv`;
         const deriv_socket = new WebSocket(socket_url);

@@ -2,12 +2,12 @@ import { forceCorrectAppId } from '../config/config';
 import { generatePKCE, storePKCEData, buildOAuth2URL, type OAuth2Config } from '../oauth/oauth-utils';
 
 // OAuth2 configuration following Deriv's documentation at developers.deriv.com
-// Valid scopes: trade, account_manage (docs: scope=trade+account_manage)
-// 'read' and 'admin' are NOT valid scopes for this client
+// Valid Deriv scopes: read, trade, trading_information, payments, admin
+// Use only 'trade' — the minimum scope needed for a trading bot
 const OAUTH_CONFIG: OAuth2Config = {
     clientId: '338FcRCgkGmDCjc6JoxXw',
     redirectUri: 'https://dbotke.netlify.app/callback',
-    scope: 'trade account_manage'
+    scope: 'trade'
 };
 
 export const redirectToLogin = async () => {
