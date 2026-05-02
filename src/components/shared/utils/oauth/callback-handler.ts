@@ -118,7 +118,7 @@ const handleOAuth2Callback = async (): Promise<CallbackResult> => {
 
     try {
         // Exchange authorization code for access token
-        const tokenResponse = await exchangeCodeForToken(code, OAUTH_CONFIG, codeVerifier);
+        const tokenResponse = await exchangeCodeForToken(code, codeVerifier, OAUTH_CONFIG.newClientId, OAUTH_CONFIG.redirectUri);
         
         console.log('✅ OAuth2 token exchange successful');
         console.log('- Token type:', tokenResponse.token_type);

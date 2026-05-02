@@ -1,14 +1,15 @@
 /**
- * OAuth2 utilities with PKCE support for both legacy and new Deriv users
+ * OAuth2 utilities with PKCE support for new Deriv users
  */
 
+// OAuth2 configuration interface
 export interface OAuth2Config {
-    legacyAppId: string;
-    newClientId: string;
+    clientId: string;
     redirectUri: string;
     scope: string;
 }
 
+// PKCE data interface
 export interface PKCEData {
     codeVerifier: string;
     codeChallenge: string;
@@ -16,23 +17,24 @@ export interface PKCEData {
 }
 
 /**
- * Generate PKCE code verifier, challenge, and state for OAuth2 flow
+ * Generate PKCE (Proof Key for Code Exchange) data for OAuth2 flow
+ * Following Deriv's OAuth 2.0 documentation
  */
 export const generatePKCE = async (): Promise<PKCEData> => {
-    // Generate code verifier (43-128 characters, URL-safe)
+    // 1. Generate a random code_verifier
     const array = crypto.getRandomValues(new Uint8Array(64));
     const codeVerifier = Array.from(array)
         .map(v => 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~'[v % 66])
         .join('');
 
-    // Generate code challenge (SHA256 hash of verifier, base64url encoded)
+    // 2. Derive the code_challenge
     const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(codeVerifier));
     const codeChallenge = btoa(String.fromCharCode(...new Uint8Array(hash)))
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
         .replace(/=+$/, '');
 
-    // Generate state (random string for CSRF protection)
+    // 3. Generate a random state for CSRF protection
     const state = crypto.getRandomValues(new Uint8Array(16))
         .reduce((s, b) => s + b.toString(16).padStart(2, '0'), '');
 
@@ -45,19 +47,30 @@ export const generatePKCE = async (): Promise<PKCEData> => {
 
 /**
  * Store PKCE data in session storage
+ * Following Deriv's OAuth 2.0 documentation
  */
 export const storePKCEData = (pkceData: PKCEData): void => {
     sessionStorage.setItem('pkce_code_verifier', pkceData.codeVerifier);
     sessionStorage.setItem('oauth_state', pkceData.state);
+    console.log(' PKCE data stored in session storage');
 };
 
 /**
  * Retrieve PKCE data from session storage
  */
-export const retrievePKCEData = (): { codeVerifier: string | null; state: string | null } => {
+export const retrievePKCEData = (): PKCEData | null => {
+    const codeVerifier = sessionStorage.getItem('pkce_code_verifier');
+    const state = sessionStorage.getItem('oauth_state');
+    
+    if (!codeVerifier || !state) {
+        console.warn(' PKCE data not found in session storage');
+        return null;
+    }
+    
     return {
-        codeVerifier: sessionStorage.getItem('pkce_code_verifier'),
-        state: sessionStorage.getItem('oauth_state')
+        codeVerifier,
+        codeChallenge: '', // Not needed for retrieval
+        state
     };
 };
 
@@ -67,21 +80,22 @@ export const retrievePKCEData = (): { codeVerifier: string | null; state: string
 export const clearPKCEData = (): void => {
     sessionStorage.removeItem('pkce_code_verifier');
     sessionStorage.removeItem('oauth_state');
+    console.log(' PKCE data cleared from session storage');
 };
 
 /**
- * Build OAuth2 authorization URL with PKCE support for both legacy and new users
+ * Build OAuth2 authorization URL according to Deriv's documentation
+ * Uses https://auth.deriv.com/oauth2/auth endpoint
  */
 export const buildOAuth2URL = (config: OAuth2Config, pkceData: PKCEData): string => {
     const params = new URLSearchParams({
         response_type: 'code',
-        client_id: config.newClientId,
+        client_id: config.clientId,
         redirect_uri: config.redirectUri,
         scope: config.scope,
         state: pkceData.state,
         code_challenge: pkceData.codeChallenge,
-        code_challenge_method: 'S256',
-        app_id: config.legacyAppId // Critical for legacy user routing
+        code_challenge_method: 'S256'
     });
 
     return `https://auth.deriv.com/oauth2/auth?${params.toString()}`;
