@@ -12,10 +12,10 @@ import {
     type OAuth2Config 
 } from './oauth-utils';
 
-// OAuth2 configuration
+// OAuth2 configuration - scopes must match what is registered in developers.deriv.com
+// Valid scopes: trade, account_manage (NOT read, NOT admin)
 const OAUTH_CONFIG: OAuth2Config = {
-    legacyAppId: '85159',
-    newClientId: '338FcRCgkGmDCjc6JoxXw',
+    clientId: '338FcRCgkGmDCjc6JoxXw',
     redirectUri: 'https://dbotke.netlify.app/callback',
     scope: 'trade account_manage'
 };
@@ -32,32 +32,32 @@ export interface CallbackResult {
  * Handle OAuth callback - supports both OAuth2 and legacy flows
  */
 export const handleOAuthCallback = async (): Promise<CallbackResult> => {
-    console.log('🔄 Processing OAuth callback...');
+    console.log('Processing OAuth callback...');
     console.log('- Current URL:', window.location.href);
     console.log('- Search params:', window.location.search);
     console.log('- Hash:', window.location.hash);
 
     try {
-        // Check if this is an OAuth2 callback (new flow)
+        // Check if this is an OAuth2 callback (new flow) — includes error callbacks
         if (isOAuth2Callback()) {
-            console.log('✅ Detected OAuth2 callback (new flow)');
+            console.log('Detected OAuth2 callback (new flow)');
             return await handleOAuth2Callback();
         }
         
         // Check if this is a legacy OAuth callback
         if (isLegacyOAuthCallback()) {
-            console.log('✅ Detected legacy OAuth callback (old flow)');
+            console.log('Detected legacy OAuth callback (old flow)');
             return handleLegacyOAuthCallback();
         }
 
-        console.log('❌ No valid OAuth callback detected');
+        console.log('No valid OAuth callback detected');
         return {
             success: false,
             error: 'No valid OAuth callback parameters found',
             flow: 'unknown'
         };
     } catch (error) {
-        console.error('❌ OAuth callback handling failed:', error);
+        console.error('OAuth callback handling failed:', error);
         return {
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error',
@@ -70,12 +70,14 @@ export const handleOAuthCallback = async (): Promise<CallbackResult> => {
  * Handle OAuth2 callback with PKCE token exchange
  */
 const handleOAuth2Callback = async (): Promise<CallbackResult> => {
-    console.log('🔄 Processing OAuth2 callback...');
+    console.log('Processing OAuth2 callback...');
 
     const { code, state, error } = parseOAuth2Callback();
     
+    // If Deriv returned an error (e.g. invalid_scope, access_denied), handle it here
     if (error) {
-        console.error('❌ OAuth2 error:', error);
+        console.error('OAuth2 error from Deriv:', error);
+        clearPKCEData();
         return {
             success: false,
             error: `OAuth2 error: ${error}`,
@@ -84,7 +86,7 @@ const handleOAuth2Callback = async (): Promise<CallbackResult> => {
     }
 
     if (!code || !state) {
-        console.error('❌ Missing OAuth2 parameters');
+        console.error('Missing OAuth2 parameters');
         return {
             success: false,
             error: 'Missing authorization code or state',
@@ -92,20 +94,22 @@ const handleOAuth2Callback = async (): Promise<CallbackResult> => {
         };
     }
 
-    // Retrieve and verify PKCE data
-    const { codeVerifier, state: storedState } = retrievePKCEData();
+    // Retrieve and verify PKCE data — guard against null
+    const pkceData = retrievePKCEData();
     
-    if (!codeVerifier) {
-        console.error('❌ Missing PKCE code verifier');
+    if (!pkceData || !pkceData.codeVerifier) {
+        console.error('Missing PKCE code verifier');
         return {
             success: false,
-            error: 'Missing PKCE code verifier',
+            error: 'Missing PKCE code verifier — session may have expired',
             flow: 'oauth2'
         };
     }
 
+    const { codeVerifier, state: storedState } = pkceData;
+
     if (state !== storedState) {
-        console.error('❌ State mismatch - potential CSRF attack');
+        console.error('State mismatch - potential CSRF attack');
         clearPKCEData();
         return {
             success: false,
@@ -114,13 +118,14 @@ const handleOAuth2Callback = async (): Promise<CallbackResult> => {
         };
     }
 
-    console.log('✅ State verified, exchanging code for token...');
+    console.log('State verified, exchanging code for token...');
 
     try {
-        // Exchange authorization code for access token
-        const tokenResponse = await exchangeCodeForToken(code, codeVerifier, OAUTH_CONFIG.newClientId, OAUTH_CONFIG.redirectUri);
+        // Exchange authorization code for access token using correct argument order:
+        // exchangeCodeForToken(code, config, codeVerifier)
+        const tokenResponse = await exchangeCodeForToken(code, OAUTH_CONFIG, codeVerifier);
         
-        console.log('✅ OAuth2 token exchange successful');
+        console.log('OAuth2 token exchange successful');
         console.log('- Token type:', tokenResponse.token_type);
         console.log('- Expires in:', tokenResponse.expires_in);
 
@@ -138,7 +143,7 @@ const handleOAuth2Callback = async (): Promise<CallbackResult> => {
             flow: 'oauth2'
         };
     } catch (error) {
-        console.error('❌ Token exchange failed:', error);
+        console.error('Token exchange failed:', error);
         clearPKCEData();
         return {
             success: false,
@@ -152,7 +157,7 @@ const handleOAuth2Callback = async (): Promise<CallbackResult> => {
  * Handle legacy OAuth callback (existing flow)
  */
 const handleLegacyOAuthCallback = (): CallbackResult => {
-    console.log('🔄 Processing legacy OAuth callback...');
+    console.log('Processing legacy OAuth callback...');
 
     const hash = window.location.hash;
     const params = new URLSearchParams(hash.substring(1));
@@ -163,7 +168,7 @@ const handleLegacyOAuthCallback = (): CallbackResult => {
         tokens[key] = value;
     }
 
-    console.log('✅ Legacy OAuth tokens extracted:', Object.keys(tokens));
+    console.log('Legacy OAuth tokens extracted:', Object.keys(tokens));
 
     if (tokens.access_token || tokens.token1) {
         return {

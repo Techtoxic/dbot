@@ -52,7 +52,7 @@ export const generatePKCE = async (): Promise<PKCEData> => {
 export const storePKCEData = (pkceData: PKCEData): void => {
     sessionStorage.setItem('pkce_code_verifier', pkceData.codeVerifier);
     sessionStorage.setItem('oauth_state', pkceData.state);
-    console.log(' PKCE data stored in session storage');
+    console.log('PKCE data stored in session storage');
 };
 
 /**
@@ -61,12 +61,12 @@ export const storePKCEData = (pkceData: PKCEData): void => {
 export const retrievePKCEData = (): PKCEData | null => {
     const codeVerifier = sessionStorage.getItem('pkce_code_verifier');
     const state = sessionStorage.getItem('oauth_state');
-    
+
     if (!codeVerifier || !state) {
-        console.warn(' PKCE data not found in session storage');
+        console.warn('PKCE data not found in session storage');
         return null;
     }
-    
+
     return {
         codeVerifier,
         codeChallenge: '', // Not needed for retrieval
@@ -80,7 +80,7 @@ export const retrievePKCEData = (): PKCEData | null => {
 export const clearPKCEData = (): void => {
     sessionStorage.removeItem('pkce_code_verifier');
     sessionStorage.removeItem('oauth_state');
-    console.log(' PKCE data cleared from session storage');
+    console.log('PKCE data cleared from session storage');
 };
 
 /**
@@ -116,7 +116,7 @@ export const exchangeCodeForToken = async (
         },
         body: new URLSearchParams({
             grant_type: 'authorization_code',
-            client_id: config.newClientId,
+            client_id: config.clientId,
             code,
             code_verifier: codeVerifier,
             redirect_uri: config.redirectUri
@@ -132,11 +132,13 @@ export const exchangeCodeForToken = async (
 };
 
 /**
- * Check if current URL contains OAuth2 callback parameters
+ * Check if current URL contains OAuth2 callback parameters.
+ * Handles both success (code + state) and error (error + state) responses.
  */
 export const isOAuth2Callback = (): boolean => {
     const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.has('code') && urlParams.has('state');
+    return (urlParams.has('code') && urlParams.has('state')) ||
+           (urlParams.has('error') && urlParams.has('state'));
 };
 
 /**
