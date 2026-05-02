@@ -5,8 +5,9 @@ import { getInitialLanguage } from '@deriv-com/translations';
 import APIMiddleware from './api-middleware';
 
 export const generateDerivApiInstance = () => {
-	// Enforce correct app id for all websocket connections
-	const cleanedAppId = String(getAppId?.() ?? '338FcRCgkGmDCjc6JoxXw');
+	// Use OAuth2 client ID for all WebSocket connections (valid for both pre-login and post-login)
+	// This resolves the InvalidAppID error on homepage before login
+	const cleanedAppId = '338FcRCgkGmDCjc6JoxXw'; // OAuth2 client ID - always valid
 	const socket_url = `wss://ws.derivws.com/websockets/v3?app_id=${cleanedAppId}&l=${getInitialLanguage()}&brand=${website_name.toLowerCase()}`;
 	const deriv_socket = new WebSocket(socket_url);
 	const deriv_api = new DerivAPIBasic({
