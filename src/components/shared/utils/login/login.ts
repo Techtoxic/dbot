@@ -49,7 +49,7 @@ const fallbackToLegacyOAuth = () => {
     const currentOrigin = window.location.origin;
     const redirectUri = `${currentOrigin}/callback`;
     
-    const legacyOauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=85159&response_type=token&scope=read,trade,admin&l=EN&brand=deriv&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    const legacyOauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=1&response_type=token&scope=read,trade&l=EN&brand=deriv&redirect_uri=${encodeURIComponent(redirectUri)}`;
     
     console.log('Legacy OAuth URL:', legacyOauthUrl);
     window.location.href = legacyOauthUrl;

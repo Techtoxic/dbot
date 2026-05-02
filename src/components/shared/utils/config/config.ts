@@ -1,6 +1,8 @@
 import { LocalStorageConstants, LocalStorageUtils, URLUtils } from '@deriv-com/utils';
 
-export const CURRENT_APP_ID = '85159';
+// app_id=1 is Deriv's public app_id — works from any domain for WebSocket API calls
+// app_id=85159 is Deriv's internal app locked to dbot.deriv.com and causes InvalidAppID elsewhere
+export const CURRENT_APP_ID = '1';
 
 export const APP_IDS = {
     LOCALHOST: CURRENT_APP_ID,

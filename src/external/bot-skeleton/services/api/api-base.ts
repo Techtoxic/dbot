@@ -230,7 +230,12 @@ class APIBase {
                 this.active_symbols = active_symbols;
                 return active_symbols || error;
             }
-        );
+        ).catch((err: unknown) => {
+            // Catch errors (e.g. InvalidAppID) so they don't close the socket and trigger a reconnect loop
+            // eslint-disable-next-line no-console
+            console.warn('getActiveSymbols failed, will retry after reconnect:', err);
+            this.toggleRunButton(false);
+        });
     };
 
     toggleRunButton = (toggle: boolean) => {
