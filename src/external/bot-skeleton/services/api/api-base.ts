@@ -162,7 +162,13 @@ class APIBase {
             if (!this.api) return;
 
             try {
-                const { authorize, error } = await this.api.authorize(this.token);
+                // Add timeout to prevent hanging on authorize call
+                const { authorize, error } = await Promise.race([
+                    this.api.authorize(this.token),
+                    new Promise((_, reject) => 
+                        setTimeout(() => reject(new Error('Authorization timeout')), 15000)
+                    )
+                ]) as { authorize: TAuthData; error: unknown };
                 if (error) return error;
 
                 if (this.has_active_symbols) {

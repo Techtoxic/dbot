@@ -42,7 +42,18 @@ const AppRoot = () => {
     useEffect(() => {
         const initializeApi = async () => {
             if (!api_base_initialized.current) {
-                await api_base.init();
+                try {
+                    // Add timeout to prevent infinite loading if auth hangs
+                    await Promise.race([
+                        api_base.init(),
+                        new Promise((_, reject) => 
+                            setTimeout(() => reject(new Error('API initialization timeout')), 30000)
+                        )
+                    ]);
+                } catch (error) {
+                    console.warn('API initialization failed or timed out:', error);
+                    // Continue anyway to prevent infinite loading
+                }
                 api_base_initialized.current = true;
                 setIsApiInitialized(true);
             }
