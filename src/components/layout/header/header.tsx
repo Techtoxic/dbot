@@ -201,7 +201,7 @@ const AppHeader = observer(() => {
                     tertiary
                     onClick={async () => {
                         const { redirectToLogin } = await import('@/components/shared/utils/login/login');
-                        await redirectToLogin();
+                        redirectToLogin();
                     }}
                 >
                     <Localize i18n_default_text='Log in' />
