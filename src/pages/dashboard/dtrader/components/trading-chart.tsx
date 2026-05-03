@@ -173,8 +173,8 @@ const TradingChart: React.FC = observer(() => {
                     return;
                 }
 
-                if (!chart_store?.symbol) {
-                    console.warn('No market symbol selected');
+                if (!chart_store?.symbol || chart_store.symbol === 'na') {
+                    console.warn('No market symbol selected or symbol is na');
                     setIsConnected(false);
                     return;
                 }

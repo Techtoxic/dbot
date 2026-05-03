@@ -100,6 +100,11 @@ const DTrader: React.FC = () => {
 
     const subscribeToMarketData = useCallback(async (symbol: string) => {
         try {
+            if (!symbol || symbol === 'na') {
+                console.warn('Skipping invalid symbol:', symbol);
+                return;
+            }
+
             // Clean up previous subscription
             if (subscriptionIdRef.current && chart_api.api) {
                 chart_api.api.forget(subscriptionIdRef.current);

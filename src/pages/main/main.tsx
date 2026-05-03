@@ -288,7 +288,7 @@ class DTraderErrorBoundary extends React.Component<
 
 const AppWrapper = observer(() => {
     const { connectionStatus } = useApiBase();
-    const { dashboard, load_modal, run_panel, summary_card } = useStore();
+    const { client, dashboard, load_modal, run_panel, summary_card } = useStore();
     const { active_tab, is_chart_modal_visible, setActiveTab } = dashboard;
     const { onEntered } = load_modal;
     const {
@@ -546,7 +546,7 @@ const AppWrapper = observer(() => {
         } finally {
             setIsLoadingBalance(false);
         }
-    }, []);
+    }, [client]);
 
     // Copy trading toggle
     const handleCopyTradingToggle = useCallback(async () => {
