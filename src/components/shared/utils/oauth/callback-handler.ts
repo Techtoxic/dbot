@@ -15,7 +15,7 @@ import {
 // OAuth2 configuration - scopes must match what is registered in developers.deriv.com
 // Valid scopes: trade, account_manage (NOT read, NOT admin)
 const OAUTH_CONFIG: OAuth2Config = {
-    clientId: '338FcRCgkGmDCjc6JoxXw',
+    clientId: '338JkzW1UxRbtJPRKWWCu',
     redirectUri: 'https://dbotke.netlify.app/callback',
     scope: 'trade account_manage'
 };

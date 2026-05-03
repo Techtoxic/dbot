@@ -7,7 +7,7 @@ const REDIRECT_URI = 'https://dbotke.netlify.app/callback';
 // Valid Deriv scopes: read, trade, trading_information, payments, admin
 // Use only 'trade' — the minimum scope needed for a trading bot
 const OAUTH_CONFIG: OAuth2Config = {
-    clientId: '338FcRCgkGmDCjc6JoxXw',
+    clientId: '338JkzW1UxRbtJPRKWWCu',
     redirectUri: REDIRECT_URI,
     scope: 'trade'
 };
