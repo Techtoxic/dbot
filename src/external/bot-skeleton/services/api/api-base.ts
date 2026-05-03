@@ -57,9 +57,6 @@ class APIBase {
     active_symbols_promise: Promise<void> | null = null;
     common_store: CommonStore | undefined;
     landing_company: string | null = null;
-    reconnect_count = 0;
-    max_reconnect_attempts = 3;
-    last_reconnect_time = 0;
 
     unsubscribeAllSubscriptions = () => {
         this.current_auth_subscriptions?.forEach(subscription_promise => {
@@ -76,8 +73,6 @@ class APIBase {
 
     onsocketopen() {
         setConnectionStatus(CONNECTION_STATUS.OPENED);
-        // Reset reconnection counter on successful connection
-        this.reconnect_count = 0;
     }
 
     onsocketclose() {
@@ -151,24 +146,9 @@ class APIBase {
     reconnectIfNotConnected = () => {
         // eslint-disable-next-line no-console
         console.log('connection state: ', this.api?.connection?.readyState);
-        
-        // Prevent infinite reconnection loops
-        const now = Date.now();
-        if (now - this.last_reconnect_time < 5000) { // Wait at least 5 seconds between reconnects
-            return;
-        }
-        
-        if (this.reconnect_count >= this.max_reconnect_attempts) {
-            console.warn('Max reconnection attempts reached, stopping reconnection attempts');
-            setIsAuthorizing(false); // Ensure loading state is cleared
-            return;
-        }
-        
         if (this.api?.connection?.readyState && this.api?.connection?.readyState > 1) {
             // eslint-disable-next-line no-console
-            console.log(`Info: Connection to the server was closed, trying to reconnect (attempt ${this.reconnect_count + 1}/${this.max_reconnect_attempts}).`);
-            this.reconnect_count++;
-            this.last_reconnect_time = now;
+            console.log('Info: Connection to the server was closed, trying to reconnect.');
             this.init(true);
         }
     };
@@ -182,13 +162,14 @@ class APIBase {
             if (!this.api) return;
 
             try {
-                // Add timeout to prevent hanging on authorize call
+                // Race authorize against a 12-second timeout so a dropped socket can't hang init() forever
+                const authorizeTimeout = new Promise<never>((_, reject) =>
+                    setTimeout(() => reject(new Error('Authorize timed out after 12 seconds')), 12000)
+                );
                 const { authorize, error } = await Promise.race([
                     this.api.authorize(this.token),
-                    new Promise((_, reject) => 
-                        setTimeout(() => reject(new Error('Authorization timeout')), 15000)
-                    )
-                ]) as { authorize: TAuthData; error: unknown };
+                    authorizeTimeout,
+                ]);
                 if (error) return error;
 
                 if (this.has_active_symbols) {
@@ -235,19 +216,12 @@ class APIBase {
                 },
                 [],
                 this
-            ).catch((err: unknown) => {
-                console.warn(`Failed to subscribe to ${streamName}:`, err);
-                return null; // Return null instead of throwing
-            });
+            );
         };
 
         const streamsToSubscribe = ['balance', 'transaction', 'proposal_open_contract'];
 
-        try {
-            await Promise.all(streamsToSubscribe.map(subscribeToStream));
-        } catch (err) {
-            console.warn('Some subscriptions failed, but continuing:', err);
-        }
+        await Promise.all(streamsToSubscribe.map(subscribeToStream));
     }
 
     getActiveSymbols = async () => {

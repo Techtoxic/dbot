@@ -1,12 +1,14 @@
 import { forceCorrectAppId } from '../config/config';
 import { generatePKCE, storePKCEData, buildOAuth2URL, type OAuth2Config } from '../oauth/oauth-utils';
 
+const REDIRECT_URI = 'https://dbotke.netlify.app/callback';
+
 // OAuth2 configuration following Deriv's documentation at developers.deriv.com
 // Valid Deriv scopes: read, trade, trading_information, payments, admin
 // Use only 'trade' — the minimum scope needed for a trading bot
 const OAUTH_CONFIG: OAuth2Config = {
     clientId: '338FcRCgkGmDCjc6JoxXw',
-    redirectUri: 'https://dbotke.netlify.app/callback',
+    redirectUri: REDIRECT_URI,
     scope: 'trade'
 };
 
@@ -46,10 +48,7 @@ const fallbackToLegacyOAuth = () => {
     console.log('Falling back to legacy OAuth...');
     forceCorrectAppId();
     
-    const currentOrigin = window.location.origin;
-    const redirectUri = `${currentOrigin}/callback`;
-    
-    const legacyOauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=133723&response_type=token&scope=read,trade&l=EN&brand=deriv&redirect_uri=${encodeURIComponent(redirectUri)}`;
+    const legacyOauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=133723&response_type=token&scope=read,trade&l=EN&brand=deriv&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
     
     console.log('Legacy OAuth URL:', legacyOauthUrl);
     window.location.href = legacyOauthUrl;

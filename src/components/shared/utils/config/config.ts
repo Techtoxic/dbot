@@ -79,9 +79,9 @@ export const getDefaultAppIdAndUrl = () => {
 export const getAppId = () => {
     let app_id = window.localStorage.getItem('config.app_id');
 
-    // Always use the correct app ID
-    if (!app_id || app_id !== CURRENT_APP_ID) {
-        console.warn("⚠️ Setting correct App ID...");
+    // Force the correct app ID if it's wrong or missing
+    if (!app_id || app_id === '69811' || app_id === '96171' || app_id !== CURRENT_APP_ID) {
+        console.warn("⚠️ App ID is invalid or outdated, forcing correct App ID...");
         console.log("🔄 Old App ID:", app_id, "-> New App ID:", CURRENT_APP_ID);
         app_id = CURRENT_APP_ID;
         window.localStorage.setItem('config.app_id', app_id);

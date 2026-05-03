@@ -97,12 +97,11 @@ export default class GoogleDriveStore {
     };
 
     initialiseClient = () => {
-        // Only initialize if client_id is configured
+        // Guard: skip if Google Drive credentials are not configured
         if (!this.client_id) {
-            console.warn('Google Drive client_id not configured, skipping initialization');
+            console.warn('Google Drive client_id not configured — skipping Google Drive initialisation');
             return;
         }
-        
         this.client = google.accounts.oauth2.initTokenClient({
             client_id: this.client_id,
             scope: this.scope,
