@@ -376,6 +376,10 @@ const DTrader: React.FC = () => {
     // Subscribe to market data - memoized to prevent infinite re-renders
     const subscribeToMarketData = useCallback(async (symbol: string) => {
         try {
+            if (!symbol || symbol === 'na') {
+                console.warn('Skipping invalid symbol:', symbol);
+                return;
+            }
             console.log(`📊 Subscribing to ${symbol} market data...`);
             
             // Clean up any existing subscriptions first

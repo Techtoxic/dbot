@@ -604,7 +604,6 @@ const AppWrapper = observer(() => {
     // Refresh balance when all_accounts_balance changes
     useEffect(() => {
         try {
-            const { client } = useStore();
             if (client?.all_accounts_balance?.accounts) {
                 fetchRealAccountBalance();
             }
