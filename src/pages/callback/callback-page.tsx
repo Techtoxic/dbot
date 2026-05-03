@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { generateDerivApiInstance } from '@/external/bot-skeleton/services/api/appId';
 import { api_base } from '@/external/bot-skeleton';
 import { Button } from '@deriv-com/ui';
 import { handleOAuthCallback, type CallbackResult } from '@/components/shared/utils/oauth/callback-handler';
@@ -91,67 +90,32 @@ const CallbackPage = () => {
                     }
                 }
             } else if (result.flow === 'legacy' && result.tokens) {
-                // Handle legacy OAuth flow (existing logic)
-                console.log('🔄 Processing legacy OAuth authentication...');
+                // Handle legacy OAuth flow.
+                // Deriv returns: acct1=CRxxxx, token1=xxxxxxx, cur1=USD (query params)
                 const tokens = result.tokens;
                 const accountsList: Record<string, string> = {};
                 const clientAccounts: Record<string, { loginid: string; token: string; currency: string }> = {};
 
-                for (const [key, value] of Object.entries(tokens)) {
-                    if (key.startsWith('acct')) {
-                        const tokenKey = key.replace('acct', 'token');
-                        if (tokens[tokenKey]) {
-                            accountsList[value] = tokens[tokenKey];
-                            clientAccounts[value] = {
-                                loginid: value,
-                                token: tokens[tokenKey],
-                                currency: '',
-                            };
-                        }
-                    } else if (key.startsWith('cur')) {
-                        const accKey = key.replace('cur', 'acct');
-                        if (tokens[accKey]) {
-                            clientAccounts[tokens[accKey]].currency = value;
-                        }
-                    }
+                // Build account maps from acct/token/cur triplets
+                let i = 1;
+                while (tokens[`acct${i}`] && tokens[`token${i}`]) {
+                    const loginid = tokens[`acct${i}`];
+                    const token = tokens[`token${i}`];
+                    const currency = tokens[`cur${i}`] || '';
+                    accountsList[loginid] = token;
+                    clientAccounts[loginid] = { loginid, token, currency };
+                    i++;
                 }
 
                 localStorage.setItem('accountsList', JSON.stringify(accountsList));
                 localStorage.setItem('clientAccounts', JSON.stringify(clientAccounts));
 
-                // Handle legacy token authorization
-                let is_token_set = false;
-                const api = await generateDerivApiInstance();
-                if (api && tokens.token1) {
-                    try {
-                        const { authorize, error } = await api.authorize(tokens.token1);
-                        if (authorize) {
-                            localStorage.setItem('callback_token', JSON.stringify(authorize));
-                            api.disconnect();
-                            if (!error) {
-                                const clientAccountsArray = Object.values(clientAccounts);
-                                const firstId = authorize?.account_list?.[0]?.loginid;
-                                const filteredTokens = clientAccountsArray.filter(
-                                    account => account.loginid === firstId
-                                );
-                                if (filteredTokens.length) {
-                                    localStorage.setItem('authToken', filteredTokens[0].token);
-                                    localStorage.setItem('active_loginid', filteredTokens[0].loginid);
-                                    is_token_set = true;
-                                }
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Error during legacy API authorization:', error);
-                    }
-                }
-                if (!is_token_set) {
-                    if (tokens.token1) {
-                        localStorage.setItem('authToken', tokens.token1);
-                    }
-                    if (tokens.acct1) {
-                        localStorage.setItem('active_loginid', tokens.acct1);
-                    }
+                // Set the first account as the active account
+                const firstLoginid = tokens['acct1'];
+                const firstToken = tokens['token1'];
+                if (firstLoginid && firstToken) {
+                    localStorage.setItem('authToken', firstToken);
+                    localStorage.setItem('active_loginid', firstLoginid);
                 }
             }
 

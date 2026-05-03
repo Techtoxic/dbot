@@ -1,55 +1,17 @@
-import { forceCorrectAppId } from '../config/config';
-import { generatePKCE, storePKCEData, buildOAuth2URL, type OAuth2Config } from '../oauth/oauth-utils';
+import { getAppId } from '@/components/shared';
 
 const REDIRECT_URI = 'https://dbotke.netlify.app/callback';
 
-// OAuth2 configuration following Deriv's documentation at developers.deriv.com
-// Valid Deriv scopes: read, trade, trading_information, payments, admin
-// Use only 'trade' — the minimum scope needed for a trading bot
-const OAUTH_CONFIG: OAuth2Config = {
-    clientId: '338JkzW1UxRbtJPRKWWCu',
-    redirectUri: REDIRECT_URI,
-    scope: 'trade'
-};
-
-export const redirectToLogin = async () => {
-    try {
-        console.log('Starting OAuth 2.0 flow...');
-        
-        // Generate PKCE data for OAuth2 flow
-        const pkceData = await generatePKCE();
-        
-        // Store PKCE data in session storage before redirecting
-        storePKCEData(pkceData);
-
-        // Build OAuth2 URL according to Deriv's documentation
-        const oauthUrl = buildOAuth2URL(OAUTH_CONFIG, pkceData);
-
-        console.log('OAuth 2.0 Debug Info:');
-        console.log('- Client ID:', OAUTH_CONFIG.clientId);
-        console.log('- Redirect URI:', OAUTH_CONFIG.redirectUri);
-        console.log('- Scope:', OAUTH_CONFIG.scope);
-        console.log('Redirecting to OAuth2...');
-
-        window.location.href = oauthUrl;
-    } catch (error) {
-        console.error('Failed to start OAuth2 flow:', error);
-        // Fallback to legacy OAuth if OAuth2 fails
-        fallbackToLegacyOAuth();
-    }
-};
-
 /**
- * Fallback to legacy OAuth flow if OAuth2 fails
- * Uses the legacy app_id for the old oauth.deriv.com endpoint
- * Valid legacy scopes: read, trade, payments, admin, trading_information
+ * Redirect to Deriv's legacy OAuth endpoint.
+ *
+ * The Deriv WebSocket API's `authorize` call expects a legacy API token
+ * (the acct/token/cur params returned by oauth.deriv.com), NOT an OAuth2
+ * Bearer access token. The OAuth2/PKCE flow returns a Bearer token that
+ * cannot be passed to `api.authorize()`, so we always use the legacy flow.
  */
-const fallbackToLegacyOAuth = () => {
-    console.log('Falling back to legacy OAuth...');
-    forceCorrectAppId();
-    
-    const legacyOauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=133723&response_type=token&scope=read,trade&l=EN&brand=deriv&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
-    
-    console.log('Legacy OAuth URL:', legacyOauthUrl);
+export const redirectToLogin = () => {
+    const appId = getAppId();
+    const legacyOauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${appId}&response_type=token&scope=read,trade&l=EN&brand=deriv&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
     window.location.href = legacyOauthUrl;
 };
