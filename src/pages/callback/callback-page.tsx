@@ -155,14 +155,12 @@ const CallbackPage = () => {
                 }
             }
 
-            // Trigger API base authorization after successful OAuth login
+            // Trigger API base initialization after successful OAuth login.
+            // init() already calls authorizeAndSubscribe() internally — no need to call it again.
             try {
-                console.log('🔄 Triggering API base authorization...');
                 await api_base.init(true);
-                await api_base.authorizeAndSubscribe();
-                console.log('✅ API base authorization completed');
             } catch (error) {
-                console.error('❌ API base authorization failed:', error);
+                console.error('API base init failed after OAuth callback:', error);
             }
 
             const query_param_currency = sessionStorage.getItem('query_param_currency');

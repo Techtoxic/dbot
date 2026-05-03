@@ -8,7 +8,6 @@ import CallbackPage from '@/pages/callback';
 import Endpoint from '@/pages/endpoint';
 import { TAuthData } from '@/types/api-types';
 import { initializeI18n, localize, TranslationProvider } from '@deriv-com/translations';
-import { api_base } from '@/external/bot-skeleton';
 import CoreStoreProvider from './CoreStoreProvider';
 import './app-root.scss';
 
@@ -64,15 +63,6 @@ function App() {
         const accountCurrency = urlParams.get('account');
 
         if (!accountsList || !clientAccounts) return;
-
-        // Trigger API base initialization (creates WS connection + authorizes) if we have tokens
-        const authToken = localStorage.getItem('authToken');
-        const activeLoginid = localStorage.getItem('active_loginid');
-        if (authToken && activeLoginid) {
-            api_base.init().catch(error => {
-                console.error('❌ API base init failed on app load:', error);
-            });
-        }
 
         try {
             const parsedAccounts = JSON.parse(accountsList);
