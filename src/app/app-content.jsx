@@ -173,11 +173,18 @@ const AppContent = observer(() => {
     useEffect(() => {
         // Force correct app ID on app startup
         forceCorrectAppId();
-        
+
         initDatadog(true);
         if (client) {
             initHotjar(client);
         }
+
+        // Initialize the WebSocket connection + authorize on mount.
+        // This must run inside AppContent (inside all providers) so hooks called
+        // by downstream observers are always within their Provider tree.
+        api_base.init().catch(err => {
+            console.error('api_base.init failed on mount:', err);
+        });
     }, []);
 
     if (common?.error) return null;
