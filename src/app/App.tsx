@@ -65,13 +65,12 @@ function App() {
 
         if (!accountsList || !clientAccounts) return;
 
-        // Trigger API base authorization if we have tokens
+        // Trigger API base initialization (creates WS connection + authorizes) if we have tokens
         const authToken = localStorage.getItem('authToken');
         const activeLoginid = localStorage.getItem('active_loginid');
         if (authToken && activeLoginid) {
-            console.log('🔄 Found existing tokens, triggering API base authorization...');
-            api_base.authorizeAndSubscribe().catch(error => {
-                console.error('❌ API base authorization failed on app load:', error);
+            api_base.init().catch(error => {
+                console.error('❌ API base init failed on app load:', error);
             });
         }
 
