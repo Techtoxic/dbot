@@ -495,7 +495,6 @@ const AppWrapper = observer(() => {
     // Fetch real account balance from client store
     const fetchRealAccountBalance = useCallback(async () => {
         try {
-            const { client } = useStore();
             if (!client) {
                 console.log('Client not available');
                 setRealAccountBalance(0);
