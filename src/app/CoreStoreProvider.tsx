@@ -132,7 +132,7 @@ const CoreStoreProvider: React.FC<{ children: React.ReactNode }> = observer(({ c
     );
 
     useEffect(() => {
-        if (!isAuthorizing && client) {
+        if (client && api_base?.api) {
             const subscription = api_base?.api?.onMessage().subscribe(handleMessages);
             msg_listener.current = { unsubscribe: subscription?.unsubscribe };
         }
@@ -161,6 +161,15 @@ const CoreStoreProvider: React.FC<{ children: React.ReactNode }> = observer(({ c
             api_base.api.getAccountStatus().then((res: TSocketResponseData<'get_account_status'>) => {
                 client?.setAccountStatus(res.get_account_status);
             });
+
+            api_base.api
+                ?.send({ balance: 1, account: 'all' })
+                .then((res: TSocketResponseData<'balance'>) => {
+                    if (res?.balance?.accounts) {
+                        client?.setAllAccountsBalance(res.balance);
+                    }
+                })
+                .catch(() => {});
         }
     }, [isAuthorizing, isAuthorized, client]);
 

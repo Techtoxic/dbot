@@ -255,6 +255,11 @@ export default class TicksService {
 
     requestTicks(options) {
         const { symbol, granularity, style } = options;
+
+        if (!symbol || symbol === 'na') {
+            return Promise.resolve([]);
+        }
+
         const request_object = {
             ticks_history: symbol,
             subscribe: 1,
