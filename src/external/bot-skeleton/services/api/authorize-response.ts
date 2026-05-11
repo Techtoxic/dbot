@@ -1,0 +1,35 @@
+import { TAuthData } from '@/types/api-types';
+
+type TAuthorizeResponse = {
+    authorize?: TAuthData;
+    error?: unknown;
+};
+
+export const normalizeAuthorizeResponse = (response: unknown): TAuthorizeResponse => {
+    if (!response || typeof response !== 'object') {
+        return { error: new Error('Invalid authorize response') };
+    }
+
+    const data = response as Record<string, unknown>;
+    const authorize_data =
+        typeof data.authorize === 'object' && data.authorize ? (data.authorize as TAuthData) : undefined;
+
+    if (authorize_data) {
+        return {
+            authorize: authorize_data,
+            error: data.error,
+        };
+    }
+
+    const is_authorize_payload =
+        data.msg_type === 'authorize' || 'account_list' in data || typeof data.loginid === 'string';
+
+    if (is_authorize_payload) {
+        return {
+            authorize: data as unknown as TAuthData,
+            error: data.error,
+        };
+    }
+
+    return { error: data.error ?? new Error('Invalid authorize response') };
+};

@@ -12,6 +12,7 @@ import {
 } from './observables/connection-status-stream';
 import ApiHelpers from './api-helpers';
 import { generateDerivApiInstance, V2GetActiveClientId, V2GetActiveToken } from './appId';
+import { normalizeAuthorizeResponse } from './authorize-response';
 import chart_api from './chart-api';
 
 type CurrentSubscription = {
@@ -166,11 +167,11 @@ class APIBase {
                 const authorizeTimeout = new Promise<never>((_, reject) =>
                     setTimeout(() => reject(new Error('Authorize timed out after 12 seconds')), 12000)
                 );
-                const { authorize, error } = await Promise.race([
-                    this.api.authorize(this.token),
-                    authorizeTimeout,
-                ]);
-                if (error) return error;
+                const authorize_response = await Promise.race([this.api.authorize(this.token), authorizeTimeout]);
+                const { authorize, error } = normalizeAuthorizeResponse(authorize_response);
+                if (error || !authorize) {
+                    throw error instanceof Error ? error : new Error('Authorize failed');
+                }
 
                 if (this.has_active_symbols) {
                     this.toggleRunButton(false);

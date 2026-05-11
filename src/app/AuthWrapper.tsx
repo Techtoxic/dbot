@@ -1,6 +1,7 @@
 import React from 'react';
 import ChunkLoader from '@/components/loader/chunk-loader';
 import { generateDerivApiInstance } from '@/external/bot-skeleton/services/api/appId';
+import { normalizeAuthorizeResponse } from '@/external/bot-skeleton/services/api/authorize-response';
 import { localize } from '@deriv-com/translations';
 import { URLUtils } from '@deriv-com/utils';
 import App from './App';
@@ -26,7 +27,8 @@ const setLocalStorageToken = async (loginInfo: URLUtils.LoginInfo[], paramsToDel
             const api = await generateDerivApiInstance();
 
             if (api) {
-                const { authorize, error } = await api.authorize(loginInfo[0].token);
+                const authorize_response = await api.authorize(loginInfo[0].token);
+                const { authorize, error } = normalizeAuthorizeResponse(authorize_response);
                 api.disconnect();
                 if (!error) {
                     const firstId = authorize?.account_list[0]?.loginid;
