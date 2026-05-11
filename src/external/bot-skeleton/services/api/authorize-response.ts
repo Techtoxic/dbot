@@ -23,7 +23,8 @@ export const normalizeAuthorizeResponse = (response: unknown): TAuthorizeRespons
 
     const has_loginid = typeof data.loginid === 'string' && data.loginid.length > 0;
     const has_account_list = Array.isArray(data.account_list);
-    const is_authorize_payload = data.msg_type === 'authorize' || (has_loginid && has_account_list);
+    const has_currency = typeof data.currency === 'string' && data.currency.length > 0;
+    const is_authorize_payload = data.msg_type === 'authorize' || (has_loginid && has_account_list && has_currency);
 
     if (is_authorize_payload) {
         return {

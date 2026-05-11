@@ -15,6 +15,8 @@ import { generateDerivApiInstance, V2GetActiveClientId, V2GetActiveToken } from 
 import { normalizeAuthorizeResponse } from './authorize-response';
 import chart_api from './chart-api';
 
+const AUTHORIZE_TIMEOUT_MS = 12000;
+
 type CurrentSubscription = {
     id: string;
     unsubscribe: () => void;
@@ -165,7 +167,7 @@ class APIBase {
             try {
                 // Race authorize against a 12-second timeout so a dropped socket can't hang init() forever
                 const authorizeTimeout = new Promise<never>((_, reject) =>
-                    setTimeout(() => reject(new Error('Authorize timed out after 12 seconds')), 12000)
+                    setTimeout(() => reject(new Error('Authorize timed out after 12 seconds')), AUTHORIZE_TIMEOUT_MS)
                 );
                 const authorize_response = await Promise.race([this.api.authorize(this.token), authorizeTimeout]);
                 const { authorize, error } = normalizeAuthorizeResponse(authorize_response);
