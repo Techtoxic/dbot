@@ -170,7 +170,18 @@ class APIBase {
                 const authorize_response = await Promise.race([this.api.authorize(this.token), authorizeTimeout]);
                 const { authorize, error } = normalizeAuthorizeResponse(authorize_response);
                 if (error || !authorize) {
-                    throw error instanceof Error ? error : new Error('Authorize failed');
+                    if (error instanceof Error) {
+                        throw error;
+                    }
+                    const error_details = (() => {
+                        if (!error) return 'Empty authorize payload';
+                        try {
+                            return JSON.stringify(error);
+                        } catch {
+                            return String(error);
+                        }
+                    })();
+                    throw new Error(`Authorize failed: ${error_details}`);
                 }
 
                 if (this.has_active_symbols) {

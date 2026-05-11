@@ -21,8 +21,9 @@ export const normalizeAuthorizeResponse = (response: unknown): TAuthorizeRespons
         };
     }
 
-    const is_authorize_payload =
-        data.msg_type === 'authorize' || 'account_list' in data || typeof data.loginid === 'string';
+    const has_loginid = typeof data.loginid === 'string' && data.loginid.length > 0;
+    const has_account_list = Array.isArray(data.account_list);
+    const is_authorize_payload = data.msg_type === 'authorize' || (has_loginid && has_account_list);
 
     if (is_authorize_payload) {
         return {
