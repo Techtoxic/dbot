@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { generateDerivApiInstance } from '@/external/bot-skeleton/services/api/appId';
+import { type CallbackResult, handleOAuthCallback } from '@/components/shared/utils/oauth/callback-handler';
 import { api_base } from '@/external/bot-skeleton';
+import { generateDerivApiInstance } from '@/external/bot-skeleton/services/api/appId';
+import { normalizeAuthorizeResponse } from '@/external/bot-skeleton/services/api/authorize-response';
 import { Button } from '@deriv-com/ui';
-import { handleOAuthCallback, type CallbackResult } from '@/components/shared/utils/oauth/callback-handler';
 
 const CallbackPage = () => {
     const [callbackResult, setCallbackResult] = useState<CallbackResult | null>(null);
@@ -56,7 +57,8 @@ const CallbackPage = () => {
                 if (api) {
                     try {
                         // For OAuth 2.0, we need to use the access token as Bearer token
-                        const { authorize, error } = await api.authorize(result.accessToken);
+                        const authorize_response = await api.authorize(result.accessToken);
+                        const { authorize, error } = normalizeAuthorizeResponse(authorize_response);
                         if (authorize && !error) {
                             console.log('✅ OAuth 2.0 API authorization successful');
                             localStorage.setItem('callback_token', JSON.stringify(authorize));
@@ -124,7 +126,8 @@ const CallbackPage = () => {
                 const api = await generateDerivApiInstance();
                 if (api && tokens.token1) {
                     try {
-                        const { authorize, error } = await api.authorize(tokens.token1);
+                        const authorize_response = await api.authorize(tokens.token1);
+                        const { authorize, error } = normalizeAuthorizeResponse(authorize_response);
                         if (authorize) {
                             localStorage.setItem('callback_token', JSON.stringify(authorize));
                             api.disconnect();
