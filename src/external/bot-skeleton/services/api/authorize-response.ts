@@ -11,12 +11,12 @@ export const normalizeAuthorizeResponse = (response: unknown): TAuthorizeRespons
     }
 
     const data = response as Record<string, unknown>;
-    const authorize_data =
+    const authorizeData =
         typeof data.authorize === 'object' && data.authorize ? (data.authorize as TAuthData) : undefined;
 
-    if (authorize_data) {
+    if (authorizeData) {
         return {
-            authorize: authorize_data,
+            authorize: authorizeData,
             error: data.error,
         };
     }
@@ -24,9 +24,9 @@ export const normalizeAuthorizeResponse = (response: unknown): TAuthorizeRespons
     const has_loginid = typeof data.loginid === 'string' && data.loginid.length > 0;
     const has_account_list = Array.isArray(data.account_list);
     const has_currency = typeof data.currency === 'string' && data.currency.length > 0;
-    const is_authorize_payload = data.msg_type === 'authorize' || (has_loginid && has_account_list && has_currency);
+    const isAuthorizePayload = data.msg_type === 'authorize' || (has_loginid && has_account_list && has_currency);
 
-    if (is_authorize_payload) {
+    if (isAuthorizePayload) {
         return {
             authorize: data as unknown as TAuthData,
             error: data.error,
