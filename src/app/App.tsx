@@ -1,12 +1,14 @@
-import { initSurvicate } from '../public-path';
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense } from 'react';
+import React from 'react';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
 import ChunkLoader from '@/components/loader/chunk-loader';
+import LocalStorageSyncWrapper from '@/components/localStorage-sync-wrapper';
 import RoutePromptDialog from '@/components/route-prompt-dialog';
+import { useAccountSwitching } from '@/hooks/useAccountSwitching';
+import { useLanguageFromURL } from '@/hooks/useLanguageFromURL';
+import { useOAuthCallback } from '@/hooks/useOAuthCallback';
 import { StoreProvider } from '@/hooks/useStore';
-import CallbackPage from '@/pages/callback';
-import Endpoint from '@/pages/endpoint';
-import { TAuthData } from '@/types/api-types';
+import { OAuthTokenExchangeService } from '@/services/oauth-token-exchange.service';
 import { initializeI18n, localize, TranslationProvider } from '@deriv-com/translations';
 import CoreStoreProvider from './CoreStoreProvider';
 import './app-root.scss';
@@ -14,116 +16,89 @@ import './app-root.scss';
 const Layout = lazy(() => import('../components/layout'));
 const AppRoot = lazy(() => import('./app-root'));
 
-const { TRANSLATIONS_CDN_URL, R2_PROJECT_NAME, CROWDIN_BRANCH_NAME } = process.env;
-const i18nInstance = initializeI18n({
-    cdnUrl: `${TRANSLATIONS_CDN_URL}/${R2_PROJECT_NAME}/${CROWDIN_BRANCH_NAME}`,
-});
+// Translations CDN is optional — requires TRANSLATIONS_CDN_URL, R2_PROJECT_NAME, and CROWDIN_BRANCH_NAME env vars.
+// Without these, the app defaults to English. See user-guide/03-white-labeling.md#translations for setup instructions.
+const i18nInstance = initializeI18n({ cdnUrl: '' });
+
+/**
+ * Component wrapper to handle language URL parameter
+ * Uses the useLanguageFromURL hook to process language switching
+ */
+const LanguageHandler = ({ children }: { children: React.ReactNode }) => {
+    useLanguageFromURL();
+    return <>{children}</>;
+};
 
 const router = createBrowserRouter(
     createRoutesFromElements(
         <Route
             path='/'
             element={
-                <Suspense fallback={<ChunkLoader message={localize('Please wait while we connect to the server...')} />}>
+                <Suspense
+                    fallback={<ChunkLoader message={localize('Please wait while we connect to the server...')} />}
+                >
                     <TranslationProvider defaultLang='EN' i18nInstance={i18nInstance}>
-                        <StoreProvider>
-                            <RoutePromptDialog />
-                            <CoreStoreProvider>
-                                <Layout />
-                            </CoreStoreProvider>
-                        </StoreProvider>
+                        <LanguageHandler>
+                            <StoreProvider>
+                                <LocalStorageSyncWrapper>
+                                    <RoutePromptDialog />
+                                    <CoreStoreProvider>
+                                        <Layout />
+                                    </CoreStoreProvider>
+                                </LocalStorageSyncWrapper>
+                            </StoreProvider>
+                        </LanguageHandler>
                     </TranslationProvider>
                 </Suspense>
             }
         >
+            {/* All child routes will be passed as children to Layout */}
             <Route index element={<AppRoot />} />
-            <Route path='endpoint' element={<Endpoint />} />
-            <Route path='callback' element={<CallbackPage />} />
         </Route>
     )
 );
 
+/**
+ * Main App component
+ *
+ * Responsibilities:
+ * 1. OAuth callback handling (via useOAuthCallback hook)
+ * 2. Account switching from URL (via useAccountSwitching hook)
+ * 3. Router provider setup
+ *
+ * All complex logic has been extracted into custom hooks for better maintainability
+ */
 function App() {
-    useEffect(() => {
-        initSurvicate();
-        window?.dataLayer?.push({ event: 'page_load' });
+    // Handle OAuth callback flow (CSRF validation + code extraction)
+    const { isProcessing, isValid, params, error, cleanupURL } = useOAuthCallback();
 
-        return () => {
-            const survicateBox = document.getElementById('survicate-box');
-            if (survicateBox) {
-                survicateBox.style.display = 'none';
-            }
-        };
-    }, []);
+    // Handle account switching via URL parameter
+    useAccountSwitching();
 
-    useEffect(() => {
-        const accountsList = localStorage.getItem('accountsList');
-        const clientAccounts = localStorage.getItem('clientAccounts');
-        const urlParams = new URLSearchParams(window.location.search);
-        const accountCurrency = urlParams.get('account');
-
-        if (!accountsList || !clientAccounts) return;
-
-        try {
-            const parsedAccounts = JSON.parse(accountsList);
-            const parsedClientAccounts = JSON.parse(clientAccounts) as TAuthData['account_list'];
-            const isValidCurrency = accountCurrency
-                ? Object.values(parsedClientAccounts).some(
-                    (account) => account.currency.toUpperCase() === accountCurrency.toUpperCase()
-                )
-                : false;
-
-            const updateLocalStorage = (token: string, loginid: string) => {
-                localStorage.setItem('authToken', token);
-                localStorage.setItem('active_loginid', loginid);
-            };
-
-            // Handle demo account
-            if (accountCurrency?.toUpperCase() === 'DEMO') {
-                const demoAccount = Object.entries(parsedAccounts).find(([key]) => key.startsWith('VR'));
-
-                if (demoAccount) {
-                    const [loginid, token] = demoAccount;
-                    updateLocalStorage(String(token), loginid);
-                    return;
-                }
-            }
-
-            // Handle real account with valid currency
-            if (accountCurrency?.toUpperCase() !== 'DEMO' && isValidCurrency) {
-                const realAccount = Object.entries(parsedClientAccounts).find(
-                    ([loginid, account]) =>
-                        !loginid.startsWith('VR') && account.currency.toUpperCase() === accountCurrency?.toUpperCase()
-                );
-
-                if (realAccount) {
-                    const [loginid, account] = realAccount;
-                    if ('token' in account) {
-                        updateLocalStorage(String(account?.token), loginid);
+    // Process the authorization code when OAuth callback is valid
+    React.useEffect(() => {
+        if (!isProcessing && isValid && params.code) {
+            // Exchange authorization code for access token
+            OAuthTokenExchangeService.exchangeCodeForToken(params.code)
+                .then(response => {
+                    if (response.access_token) {
+                        cleanupURL();
+                    } else if (response.error) {
+                        console.error('❌ Token exchange failed:', response.error);
+                        console.error('Error description:', response.error_description);
+                        // Clean up URL even on error
+                        cleanupURL();
                     }
-                    return;
-                }
-            }
-        } catch (e) {
-            console.warn('Error parsing accounts:', e);
+                })
+                .catch(error => {
+                    console.error('❌ Token exchange request failed:', error);
+                    // Clean up URL even on error
+                    cleanupURL();
+                });
+        } else if (!isProcessing && error) {
+            console.error('OAuth callback error:', error);
         }
-    }, []);
-
-    // ✅ Register the service worker (for PWA support)
-    useEffect(() => {
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker
-                    .register('/service-worker.js')
-                    .then((registration) => {
-                        console.log('Service Worker registered with scope:', registration.scope);
-                    })
-                    .catch((error) => {
-                        console.log('Service Worker registration failed:', error);
-                    });
-            });
-        }
-    }, []);
+    }, [isProcessing, isValid, params.code, error, cleanupURL]);
 
     return <RouterProvider router={router} />;
 }
