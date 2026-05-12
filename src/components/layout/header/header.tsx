@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
-import { standalone_routes } from '@/components/shared';
+import { standalone_routes, generateOAuthURL } from '@/components/shared';
 import Button from '@/components/shared_ui/button';
 import Modal from '@/components/shared_ui/modal';
 import useActiveAccount from '@/hooks/api/account/useActiveAccount';
 import { useApiBase } from '@/hooks/useApiBase';
 import { useStore } from '@/hooks/useStore';
+import { setIsAuthorizing as setIsAuthorizingStream } from '@/external/bot-skeleton/services/api/observables/connection-status-stream';
 import { StandaloneCircleUserRegularIcon } from '@deriv/quill-icons/Standalone';
 import { Localize, useTranslations } from '@deriv-com/translations';
 import { Header, useDevice, Wrapper } from '@deriv-com/ui';
@@ -142,6 +143,16 @@ const AppHeader = observer(() => {
     const { isDesktop } = useDevice();
     const { isAuthorizing, isAuthorized, activeLoginid } = useApiBase();
     const { client } = useStore() ?? {};
+    const [authTimeout, setAuthTimeout] = useState(false);
+
+    // Detect OAuth callback on mount (before App.tsx cleans up the URL).
+    // When ?code=...&state=... is present the full auth flow can take 7-15 s
+    // (token exchange → accounts fetch → OTP → WebSocket auth), so we must
+    // suppress the short fallback timeout and keep the spinner throughout.
+    const [isOAuthPending, setIsOAuthPending] = useState(() => {
+        const params = new URLSearchParams(window.location.search);
+        return Boolean(params.get('code') && params.get('state'));
+    });
 
     const { data: activeAccount } = useActiveAccount({ allBalanceData: client?.all_accounts_balance });
     const { accounts } = client ?? {};
@@ -149,14 +160,74 @@ const AppHeader = observer(() => {
 
     const { localize } = useTranslations();
 
-    // Trial account logic - check if current user is a trial account
-        // const isCurrentUserTrialAccount = isTrialAccount(activeLoginid);
-        // const displayCurrency = getDisplayCurrency(activeLoginid, activeAccount?.currency);
-        // const displayAccountType = getDisplayAccountType(activeLoginid, Boolean(activeAccount?.is_virtual));
+    // Clear OAuth-pending flag once the account is set (auth succeeded)
+    // or after a generous timeout in case something goes wrong.
+    useEffect(() => {
+        if (!isOAuthPending) return;
+
+        if (activeLoginid || isAuthorized) {
+            setIsOAuthPending(false);
+            return;
+        }
+
+        // Safety net: give up after 30 s and let the normal flow decide
+        const timer = setTimeout(() => setIsOAuthPending(false), 30_000);
+        return () => clearTimeout(timer);
+    }, [isOAuthPending, activeLoginid, isAuthorized]);
+
+    // Fallback timeout: show login button if auth never resolves.
+    // Suppressed during the OAuth callback flow (isOAuthPending = true).
+    useEffect(() => {
+        if (isOAuthPending) return;
+
+        const timer = setTimeout(() => {
+            if (isAuthorizing && !activeLoginid && !isAuthorized) {
+                setAuthTimeout(true);
+                setIsAuthorizingStream(false);
+            }
+        }, 5000);
+
+        if (activeLoginid || isAuthorized || !isAuthorizing) {
+            if (authTimeout) setAuthTimeout(false);
+            clearTimeout(timer);
+        }
+
+        return () => clearTimeout(timer);
+    }, [isAuthorizing, activeLoginid, isAuthorized, authTimeout, isOAuthPending]);
+
+    // Handle signup via OAuth
+    const handleSignup = useCallback(async () => {
+        try {
+            setIsAuthorizingStream(true);
+            const oauthUrl = await generateOAuthURL('registration');
+            if (oauthUrl) {
+                window.location.replace(oauthUrl);
+            } else {
+                console.error('Failed to generate OAuth URL for signup');
+                setIsAuthorizingStream(false);
+            }
+        } catch (error) {
+            console.error('Signup redirection failed:', error);
+            setIsAuthorizingStream(false);
+        }
+    }, []);
+
+    // Handle login via OAuth
+    const handleLogin = useCallback(async () => {
+        try {
+            setIsAuthorizingStream(true);
+            const { redirectToLogin } = await import('@/components/shared/utils/login/login');
+            redirectToLogin();
+        } catch (error) {
+            console.error('Login redirection failed:', error);
+            setIsAuthorizingStream(false);
+        }
+    }, []);
 
     // Render account info and actions depending on auth state
     const renderAccountSection = () => {
-        if (isAuthorizing) {
+        // Show loader during OAuth flow or while authorizing
+        if (isOAuthPending || isAuthorizing) {
             return <AccountsInfoLoader isLoggedIn isMobile={!isDesktop} speed={3} />;
         } else if (isAuthorized || activeLoginid) {
             return (
@@ -195,22 +266,18 @@ const AppHeader = observer(() => {
                 </>
             );
         }
+        // Show login/signup buttons only when not in OAuth flow and auth timed out or never started
         return (
             <div className='auth-actions'>
                 <Button
                     tertiary
-                    onClick={async () => {
-                        const { redirectToLogin } = await import('@/components/shared/utils/login/login');
-                        redirectToLogin();
-                    }}
+                    onClick={handleLogin}
                 >
                     <Localize i18n_default_text='Log in' />
                 </Button>
                 <Button
                     primary
-                    onClick={() => {
-                        window.open(standalone_routes.signup);
-                    }}
+                    onClick={handleSignup}
                 >
                     <Localize i18n_default_text='Sign up' />
                 </Button>

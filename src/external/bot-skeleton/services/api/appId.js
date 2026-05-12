@@ -23,8 +23,24 @@ export const getLoginId = () => {
 };
 
 export const V2GetActiveToken = () => {
+        // First check localStorage (legacy flow)
         const token = localStorage.getItem('authToken');
         if (token && token !== 'null') return token;
+        
+        // Then check sessionStorage for OAuth2 flow (OIDC)
+        const authInfoStr = sessionStorage.getItem('auth_info');
+        if (authInfoStr) {
+                try {
+                        const authInfo = JSON.parse(authInfoStr);
+                        // Check if token is not expired
+                        if (authInfo.access_token && authInfo.expires_at && Date.now() < authInfo.expires_at) {
+                                return authInfo.access_token;
+                        }
+                } catch (e) {
+                        console.error('Error parsing auth_info from sessionStorage:', e);
+                }
+        }
+        
         return null;
 };
 
@@ -32,11 +48,18 @@ export const V2GetActiveClientId = () => {
         const token = V2GetActiveToken();
 
         if (!token) return null;
+        
+        // First try to get from accountsList (legacy flow)
         const account_list = JSON.parse(localStorage.getItem('accountsList'));
         if (account_list && account_list !== 'null') {
                 const active_clientId = Object.keys(account_list).find(key => account_list[key] === token);
-                return active_clientId;
+                if (active_clientId) return active_clientId;
         }
+        
+        // Fall back to active_loginid (OAuth2 flow stores this during auth)
+        const active_loginid = localStorage.getItem('active_loginid');
+        if (active_loginid && active_loginid !== 'null') return active_loginid;
+        
         return null;
 };
 
