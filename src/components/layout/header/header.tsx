@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
-import { generateOAuthURL } from '@/components/shared';
+import { redirectToLogin } from '@/components/shared/utils/login/login';
 import Button from '@/components/shared_ui/button';
 import Modal from '@/components/shared_ui/modal';
 import useActiveAccount from '@/hooks/api/account/useActiveAccount';
@@ -209,13 +209,8 @@ const AppHeader = observer(() => {
     const handleSignup = useCallback(async () => {
         try {
             setIsAuthorizing(true);
-            const oauthUrl = await generateOAuthURL('registration');
-            if (oauthUrl) {
-                window.location.replace(oauthUrl);
-            } else {
-                console.error('Failed to generate OAuth URL for signup');
-                setIsAuthorizing(false);
-            }
+            // Use the same OAuth2 PKCE flow - user can sign up through Deriv's OAuth page
+            await redirectToLogin();
         } catch (error) {
             console.error('Signup redirection failed:', error);
             setIsAuthorizing(false);
@@ -226,17 +221,8 @@ const AppHeader = observer(() => {
         try {
             // Set authorizing state immediately when login is clicked
             setIsAuthorizing(true);
-
-            // Generate OAuth URL with CSRF token and PKCE parameters
-            const oauthUrl = await generateOAuthURL();
-
-            if (oauthUrl) {
-                // Redirect to OAuth URL
-                window.location.replace(oauthUrl);
-            } else {
-                console.error('Failed to generate OAuth URL');
-                setIsAuthorizing(false);
-            }
+            // Use the proper OAuth2 PKCE flow from login.ts
+            await redirectToLogin();
         } catch (error) {
             console.error('Login redirection failed:', error);
             // Reset authorizing state if redirection fails
