@@ -165,3 +165,28 @@ export const LANGUAGES = [
         placeholderIconInMobile: <FlagChinaTraditionalIcon height={14.67} width={22} />,
     },
 ];
+
+
+// Filtered languages for UI display
+export const FILTERED_LANGUAGES = LANGUAGES.filter(lang =>
+    [
+        'EN',
+        'ES',
+        'FR',
+        'PT',
+        'AR',
+        'IT',
+        'RU',
+        'VI',
+        'ZH_CN',
+        'ZH_TW',
+        'DE',
+        'BN',
+        'SW',
+        'KO',
+        'PL',
+        'SI',
+        'TA',
+        'MN',
+    ].includes(lang.code)
+);
