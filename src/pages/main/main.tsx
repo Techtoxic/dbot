@@ -504,10 +504,27 @@ const AppWrapper = observer(() => {
             setIsLoadingBalance(true);
 
             // Get all accounts and find the real account (not virtual)
-            const allAccounts = client.all_accounts_balance?.accounts;
+            let allAccounts = client.all_accounts_balance?.accounts;
+            if (!allAccounts || Object.keys(allAccounts).length === 0) {
+                try {
+                    const balanceResponse = await api_base.api?.send({ balance: 1, account: 'all' });
+                    if (balanceResponse?.balance?.accounts) {
+                        client.setAllAccountsBalance(balanceResponse.balance);
+                        allAccounts = balanceResponse.balance.accounts;
+                    }
+                } catch (balanceError) {
+                    console.error('Failed to request account balances:', balanceError);
+                }
+            }
+
             if (!allAccounts || Object.keys(allAccounts).length === 0) {
                 console.log('No accounts balance data available');
-                setRealAccountBalance(0);
+                const parsedBalance = Number(client.balance);
+                const fallbackBalance = Number.isFinite(parsedBalance) ? parsedBalance : 0;
+                setRealAccountBalance(fallbackBalance);
+                if (simpleCopyTradingService) {
+                    simpleCopyTradingService.updateRealAccountBalance(fallbackBalance);
+                }
                 return;
             }
 
@@ -609,7 +626,7 @@ const AppWrapper = observer(() => {
         } catch (error) {
             console.error('Error refreshing balance:', error);
         }
-    }, [fetchRealAccountBalance]);
+    }, [fetchRealAccountBalance, client?.all_accounts_balance]);
 
     // Set up global demo trade emitter for copy trading
     useEffect(() => {
