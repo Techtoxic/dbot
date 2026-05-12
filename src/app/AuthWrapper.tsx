@@ -7,7 +7,6 @@ import { api_base } from '@/external/bot-skeleton';
 import { handleOAuthCallback } from '@/components/shared/utils/oauth/callback-handler';
 import { localize } from '@deriv-com/translations';
 import { URLUtils } from '@deriv-com/utils';
-import { requestLegacyToken } from '@deriv-com/auth-client';
 import App from './App';
 
 const setLocalStorageToken = async (loginInfo: URLUtils.LoginInfo[], paramsToDelete: string[]) => {
@@ -55,48 +54,33 @@ const setLocalStorageToken = async (loginInfo: URLUtils.LoginInfo[], paramsToDel
 
 const setOAuth2LocalStorageToken = async (accessToken: string) => {
     try {
-        const legacyTokens = await requestLegacyToken(accessToken);
+        // Store the OAuth 2.0 access token in session storage
+        // api_base.init(true) will handle websocket authorization using this token
+        console.log('🔄 Storing OAuth 2.0 access token...');
+        sessionStorage.setItem('auth_info', JSON.stringify({
+            access_token: accessToken,
+            token_type: 'bearer',
+            expires_at: Date.now() + 3600000  
+        }));
 
-        const accountsList: Record<string, string> = {};
-        const clientAccounts: Record<string, { loginid: string; token: string; currency: string }> = {};
-
-        Object.entries(legacyTokens).forEach(([key, value]) => {
-            if (!key.startsWith('acct')) return;
-
-            const tokenKey = key.replace('acct', 'token');
-            const currencyKey = key.replace('acct', 'cur');
-            const token = legacyTokens[tokenKey as keyof typeof legacyTokens];
-
-            if (typeof token !== 'string' || !token) return;
-
-            accountsList[value] = token;
-            clientAccounts[value] = {
-                loginid: value,
-                token,
-                currency: (legacyTokens[currencyKey as keyof typeof legacyTokens] as string) || '',
-            };
-        });
-
-        if (legacyTokens.token1 && legacyTokens.acct1) {
-            localStorage.setItem('authToken', legacyTokens.token1);
-            localStorage.setItem('active_loginid', legacyTokens.acct1);
-            localStorage.setItem('accountsList', JSON.stringify(accountsList));
-            localStorage.setItem('clientAccounts', JSON.stringify(clientAccounts));
-            localStorage.setItem('callback_token', JSON.stringify(legacyTokens));
-
-            const domains = ['deriv.com', 'deriv.dev', 'binary.sx', 'pages.dev', 'localhost', 'deriv.be', 'deriv.me'];
-            const currentDomain = window.location.hostname.split('.').slice(-2).join('.');
-            if (domains.includes(currentDomain)) {
-                Cookies.set('logged_state', 'true', {
-                    expires: 30,
-                    path: '/',
-                    domain: currentDomain,
-                    secure: true,
-                });
-            }
+        // Set login cookie for OIDC flow recognition
+        const domains = ['deriv.com', 'deriv.dev', 'binary.sx', 'pages.dev', 'localhost', 'deriv.be', 'deriv.me'];
+        const currentDomain = window.location.hostname.split('.').slice(-2).join('.');
+        if (domains.includes(currentDomain)) {
+            Cookies.set('logged_state', 'true', {
+                expires: 30,
+                path: '/',
+                domain: currentDomain,
+                secure: true,
+            });
         }
 
+        // Initialize websocket auth - api_base will handle account authorization
+        // using the stored access_token from sessionStorage
+        console.log('🔌 Initializing websocket connection...');
         await api_base.init(true);
+        
+        console.log('✅ OAuth 2.0 authentication completed!');
     } catch (error) {
         console.error('Error setting up OAuth2 login info:', error);
     }
