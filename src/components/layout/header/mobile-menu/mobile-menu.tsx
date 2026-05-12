@@ -12,7 +12,11 @@ import MenuHeader from './menu-header';
 import ToggleButton from './toggle-button';
 import './mobile-menu.scss';
 
-const MobileMenu = () => {
+type TMobileMenuProps = {
+    onLogout?: () => void;
+};
+
+const MobileMenu = ({ onLogout }: TMobileMenuProps) => {
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const { currentLang = 'EN', localize, switchLanguage } = useTranslations();
     const { hideModal, isModalOpenFor, showModal } = useModalManager();
