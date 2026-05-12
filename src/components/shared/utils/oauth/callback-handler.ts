@@ -2,14 +2,14 @@
  * Enhanced callback handler for both OAuth2 and legacy OAuth flows
  */
 
-import { 
-    isOAuth2Callback, 
-    isLegacyOAuthCallback, 
-    parseOAuth2Callback, 
-    retrievePKCEData, 
-    clearPKCEData, 
+import {
+    isOAuth2Callback,
+    isLegacyOAuthCallback,
+    parseOAuth2Callback,
+    retrievePKCEData,
+    clearPKCEData,
     exchangeCodeForToken,
-    type OAuth2Config 
+    type OAuth2Config,
 } from './oauth-utils';
 
 // OAuth2 configuration - scopes must match what is registered in developers.deriv.com
@@ -17,7 +17,7 @@ import {
 const OAUTH_CONFIG: OAuth2Config = {
     clientId: '338JkzW1UxRbtJPRKWWCu',
     redirectUri: 'https://dbotke.netlify.app/callback',
-    scope: 'trade account_manage'
+    scope: 'trade account_manage',
 };
 
 export interface CallbackResult {
@@ -43,7 +43,7 @@ export const handleOAuthCallback = async (): Promise<CallbackResult> => {
             console.log('Detected OAuth2 callback (new flow)');
             return await handleOAuth2Callback();
         }
-        
+
         // Check if this is a legacy OAuth callback
         if (isLegacyOAuthCallback()) {
             console.log('Detected legacy OAuth callback (old flow)');
@@ -54,14 +54,14 @@ export const handleOAuthCallback = async (): Promise<CallbackResult> => {
         return {
             success: false,
             error: 'No valid OAuth callback parameters found',
-            flow: 'unknown'
+            flow: 'unknown',
         };
     } catch (error) {
         console.error('OAuth callback handling failed:', error);
         return {
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error',
-            flow: 'unknown'
+            flow: 'unknown',
         };
     }
 };
@@ -73,7 +73,7 @@ const handleOAuth2Callback = async (): Promise<CallbackResult> => {
     console.log('Processing OAuth2 callback...');
 
     const { code, state, error } = parseOAuth2Callback();
-    
+
     // If Deriv returned an error (e.g. invalid_scope, access_denied), handle it here
     if (error) {
         console.error('OAuth2 error from Deriv:', error);
@@ -81,7 +81,7 @@ const handleOAuth2Callback = async (): Promise<CallbackResult> => {
         return {
             success: false,
             error: `OAuth2 error: ${error}`,
-            flow: 'oauth2'
+            flow: 'oauth2',
         };
     }
 
@@ -90,19 +90,19 @@ const handleOAuth2Callback = async (): Promise<CallbackResult> => {
         return {
             success: false,
             error: 'Missing authorization code or state',
-            flow: 'oauth2'
+            flow: 'oauth2',
         };
     }
 
     // Retrieve and verify PKCE data — guard against null
     const pkceData = retrievePKCEData();
-    
+
     if (!pkceData || !pkceData.codeVerifier) {
         console.error('Missing PKCE code verifier');
         return {
             success: false,
             error: 'Missing PKCE code verifier — session may have expired',
-            flow: 'oauth2'
+            flow: 'oauth2',
         };
     }
 
@@ -114,7 +114,7 @@ const handleOAuth2Callback = async (): Promise<CallbackResult> => {
         return {
             success: false,
             error: 'State verification failed',
-            flow: 'oauth2'
+            flow: 'oauth2',
         };
     }
 
@@ -124,7 +124,7 @@ const handleOAuth2Callback = async (): Promise<CallbackResult> => {
         // Exchange authorization code for access token using correct argument order:
         // exchangeCodeForToken(code, config, codeVerifier)
         const tokenResponse = await exchangeCodeForToken(code, OAUTH_CONFIG, codeVerifier);
-        
+
         console.log('OAuth2 token exchange successful');
         console.log('- Token type:', tokenResponse.token_type);
         console.log('- Expires in:', tokenResponse.expires_in);
@@ -138,9 +138,9 @@ const handleOAuth2Callback = async (): Promise<CallbackResult> => {
             tokens: {
                 access_token: tokenResponse.access_token,
                 token_type: tokenResponse.token_type,
-                ...(tokenResponse.expires_in && { expires_in: tokenResponse.expires_in.toString() })
+                ...(tokenResponse.expires_in && { expires_in: tokenResponse.expires_in.toString() }),
             },
-            flow: 'oauth2'
+            flow: 'oauth2',
         };
     } catch (error) {
         console.error('Token exchange failed:', error);
@@ -148,7 +148,7 @@ const handleOAuth2Callback = async (): Promise<CallbackResult> => {
         return {
             success: false,
             error: error instanceof Error ? error.message : 'Token exchange failed',
-            flow: 'oauth2'
+            flow: 'oauth2',
         };
     }
 };
@@ -175,14 +175,14 @@ const handleLegacyOAuthCallback = (): CallbackResult => {
             success: true,
             tokens,
             accessToken: tokens.access_token || tokens.token1,
-            flow: 'legacy'
+            flow: 'legacy',
         };
     }
 
     return {
         success: false,
         error: 'No access token found in legacy OAuth callback',
-        flow: 'legacy'
+        flow: 'legacy',
     };
 };
 

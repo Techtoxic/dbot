@@ -31,7 +31,7 @@
         background-color: var(--button-toggle-alternate);
     }
 
-    &[aria-pressed="true"] {
+    &[aria-pressed='true'] {
         background-color: var(--button-active);
         color: var(--text-inverse);
     }
@@ -372,13 +372,13 @@
     align-items: center;
     justify-content: center;
     transition: transform 0.2s ease;
-    
+
     &:hover {
         transform: scale(1.1);
     }
 
     svg {
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
     }
 }
 
@@ -417,7 +417,6 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    
 
     .social-link {
         display: flex;

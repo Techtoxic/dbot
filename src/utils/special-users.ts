@@ -2,10 +2,7 @@
 // These login IDs should be treated as trial accounts for marketing purposes
 // They will show USD icons and USD account information without sending data to server
 
-const TRIAL_ACCOUNT_LOGIN_IDS = [
-    'VRTC7579953',
-    
-];
+const TRIAL_ACCOUNT_LOGIN_IDS = ['VRTC7579953'];
 
 /**
  * Check if a login ID belongs to a special trial account
@@ -58,5 +55,5 @@ export default {
     isTrialAccount,
     isSpecialUser,
     getDisplayCurrency,
-    getDisplayAccountType
+    getDisplayAccountType,
 };

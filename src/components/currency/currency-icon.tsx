@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 
 // Trial account login IDs for marketing purposes
-const TRIAL_ACCOUNT_IDS = ['VRTC7579953',];
+const TRIAL_ACCOUNT_IDS = ['VRTC7579953'];
 
 // Check if a login ID is a trial account
 const isTrialAccount = (loginId?: string | null): boolean => {

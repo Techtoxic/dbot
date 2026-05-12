@@ -43,10 +43,7 @@ const AppRoot = () => {
         const initializeApi = async () => {
             if (!api_base_initialized.current) {
                 // Add a 15-second timeout so a hung authorize() call never blocks the app from loading
-                await Promise.race([
-                    api_base.init(),
-                    new Promise<void>(resolve => setTimeout(resolve, 15000)),
-                ]);
+                await Promise.race([api_base.init(), new Promise<void>(resolve => setTimeout(resolve, 15000))]);
                 api_base_initialized.current = true;
                 setIsApiInitialized(true);
             }

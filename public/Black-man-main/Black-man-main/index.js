@@ -165,7 +165,10 @@ function processTick(tick) {
 
     if (!rafPending) {
         rafPending = true;
-        requestAnimationFrame(() => { rafPending = false; updateDisplay(lastDigit); });
+        requestAnimationFrame(() => {
+            rafPending = false;
+            updateDisplay(lastDigit);
+        });
     }
 }
 

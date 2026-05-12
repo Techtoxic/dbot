@@ -173,7 +173,7 @@ export default class JournalStore {
 
         if (loginid) {
             const current_account = account_list?.find(account => account?.loginid === loginid);
-            
+
             // Check if this is a trial account for marketing purposes
             if (isTrialAccount(loginid)) {
                 // For trial accounts, always show USD and real account type

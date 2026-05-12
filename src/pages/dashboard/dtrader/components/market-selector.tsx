@@ -14,7 +14,7 @@ interface Market {
 const MarketSelector: React.FC = observer(() => {
     const store = useStore();
     const chart_store = store?.chart_store;
-    
+
     // Show loading state if store is not ready
     if (!store || !chart_store) {
         return (
@@ -332,8 +332,9 @@ const MarketSelector: React.FC = observer(() => {
                     {availableMarkets.map(market => (
                         <div
                             key={`${market.symbol}-${market.is_1s ? '1s' : 'regular'}`}
-                            className={`market-selector__option ${market.symbol === selectedMarket.symbol ? 'selected' : ''
-                                }`}
+                            className={`market-selector__option ${
+                                market.symbol === selectedMarket.symbol ? 'selected' : ''
+                            }`}
                             onClick={() => handleMarketSelect(market)}
                         >
                             <div className='market-option__left'>

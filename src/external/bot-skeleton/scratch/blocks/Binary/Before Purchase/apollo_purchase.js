@@ -98,5 +98,3 @@ window.Blockly.JavaScript.javascriptGenerator.forBlock.apollo_purchase = block =
 `;
     return code;
 };
-
-

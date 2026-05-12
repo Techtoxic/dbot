@@ -11,7 +11,7 @@ type TOption = {
 
 const default_domain = 'scofieldtradings.netlify.app';
 const host_map = {
-    'scofieldtradings.netlify.app': 'scofieldtradings.netlify.app'
+    'scofieldtradings.netlify.app': 'scofieldtradings.netlify.app',
 };
 
 let location_url: Location, default_language: string;
@@ -84,7 +84,10 @@ export const urlForCurrentDomain = (href: string) => {
     if (Object.keys(host_map).includes(url_object.hostname)) {
         url_object.hostname = host_map[url_object.hostname as keyof typeof host_map];
     } else if (url_object.hostname.match(default_domain)) {
-        url_object.hostname = url_object.hostname.replace(new RegExp(`\\.${default_domain}`, 'i'), `.${current_domain}`);
+        url_object.hostname = url_object.hostname.replace(
+            new RegExp(`\\.${default_domain}`, 'i'),
+            `.${current_domain}`
+        );
     } else {
         return href;
     }

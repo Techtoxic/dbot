@@ -24,7 +24,9 @@ const router = createBrowserRouter(
         <Route
             path='/'
             element={
-                <Suspense fallback={<ChunkLoader message={localize('Please wait while we connect to the server...')} />}>
+                <Suspense
+                    fallback={<ChunkLoader message={localize('Please wait while we connect to the server...')} />}
+                >
                     <TranslationProvider defaultLang='EN' i18nInstance={i18nInstance}>
                         <StoreProvider>
                             <RoutePromptDialog />
@@ -69,8 +71,8 @@ function App() {
             const parsedClientAccounts = JSON.parse(clientAccounts) as TAuthData['account_list'];
             const isValidCurrency = accountCurrency
                 ? Object.values(parsedClientAccounts).some(
-                    (account) => account.currency.toUpperCase() === accountCurrency.toUpperCase()
-                )
+                      account => account.currency.toUpperCase() === accountCurrency.toUpperCase()
+                  )
                 : false;
 
             const updateLocalStorage = (token: string, loginid: string) => {
@@ -115,10 +117,10 @@ function App() {
             window.addEventListener('load', () => {
                 navigator.serviceWorker
                     .register('/service-worker.js')
-                    .then((registration) => {
+                    .then(registration => {
                         console.log('Service Worker registered with scope:', registration.scope);
                     })
-                    .catch((error) => {
+                    .catch(error => {
                         console.log('Service Worker registration failed:', error);
                     });
             });

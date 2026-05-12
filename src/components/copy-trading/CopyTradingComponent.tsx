@@ -1,6 +1,6 @@
-import React, { useEffect,useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Localize } from '@deriv/translations';
-import { TradeSignal,useCopyTrading } from '../../hooks/useCopyTrading';
+import { TradeSignal, useCopyTrading } from '../../hooks/useCopyTrading';
 import { DerivAccount } from '../../services/deriv-copy-trading';
 import './CopyTradingComponent.scss';
 

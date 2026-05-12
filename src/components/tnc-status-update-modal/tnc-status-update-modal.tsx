@@ -111,7 +111,10 @@ const TncStatusUpdateModal: React.FC = observer(() => {
 
             let approval_response = await sendTncApproval();
 
-            if (approval_response?.error?.code === 'InvalidToken' || approval_response?.error?.code === 'AuthorizationRequired') {
+            if (
+                approval_response?.error?.code === 'InvalidToken' ||
+                approval_response?.error?.code === 'AuthorizationRequired'
+            ) {
                 await api_base.init(true);
                 approval_response = await sendTncApproval();
             }

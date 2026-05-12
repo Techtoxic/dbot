@@ -239,8 +239,8 @@ class APIBase {
     }
 
     getActiveSymbols = async () => {
-        await doUntilDone(() => this.api?.send({ active_symbols: 'brief' }), [], this).then(
-            ({ active_symbols = [], error = {} }) => {
+        await doUntilDone(() => this.api?.send({ active_symbols: 'brief' }), [], this)
+            .then(({ active_symbols = [], error = {} }) => {
                 const pip_sizes = {};
                 if (active_symbols.length) this.has_active_symbols = true;
                 active_symbols.forEach(({ symbol, pip }: { symbol: string; pip: string }) => {
@@ -250,13 +250,13 @@ class APIBase {
                 this.toggleRunButton(false);
                 this.active_symbols = active_symbols;
                 return active_symbols || error;
-            }
-        ).catch((err: unknown) => {
-            // Catch errors (e.g. InvalidAppID) so they don't close the socket and trigger a reconnect loop
-            // eslint-disable-next-line no-console
-            console.warn('getActiveSymbols failed, will retry after reconnect:', err);
-            this.toggleRunButton(false);
-        });
+            })
+            .catch((err: unknown) => {
+                // Catch errors (e.g. InvalidAppID) so they don't close the socket and trigger a reconnect loop
+                // eslint-disable-next-line no-console
+                console.warn('getActiveSymbols failed, will retry after reconnect:', err);
+                this.toggleRunButton(false);
+            });
     };
 
     toggleRunButton = (toggle: boolean) => {

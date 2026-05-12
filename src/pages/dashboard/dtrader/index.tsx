@@ -141,28 +141,28 @@ const DTrader: React.FC = () => {
                     boxShadow: 'none',
                 }}
             >
-                    <iframe
-                        ref={syncFrameRef}
-                        src={`${traderOrigin}/localstorage-sync.html`}
-                        title='DTrader storage sync'
-                        loading='eager'
-                        onLoad={() => {
-                            setIsSyncFrameLoaded(true);
-                            syncTraderStorage();
-                        }}
-                        aria-hidden='true'
-                        tabIndex={-1}
-                        style={{
-                            position: 'absolute',
-                            width: 0,
-                            height: 0,
-                            border: 0,
-                            opacity: 0,
-                            pointerEvents: 'none',
-                        }}
-                    />
                 <iframe
-                        key={traderFrameVersion}
+                    ref={syncFrameRef}
+                    src={`${traderOrigin}/localstorage-sync.html`}
+                    title='DTrader storage sync'
+                    loading='eager'
+                    onLoad={() => {
+                        setIsSyncFrameLoaded(true);
+                        syncTraderStorage();
+                    }}
+                    aria-hidden='true'
+                    tabIndex={-1}
+                    style={{
+                        position: 'absolute',
+                        width: 0,
+                        height: 0,
+                        border: 0,
+                        opacity: 0,
+                        pointerEvents: 'none',
+                    }}
+                />
+                <iframe
+                    key={traderFrameVersion}
                     src={shouldRenderDTraderFrame ? frameUrl : 'about:blank'}
                     title='Custom DTrader'
                     loading='eager'
@@ -179,33 +179,61 @@ const DTrader: React.FC = () => {
         </div>
     );
     // Fallback markets - volatility indices first, then jump indices
-    const fallbackMarkets: MarketData[] = useMemo(() => [
-        // 1-second Volatility Indices (Most Popular)
-        { symbol: '1HZ10V', name: 'Volatility 10 (1s) Index', market: 'synthetic_index', submarket: 'random_index' },
-        { symbol: '1HZ25V', name: 'Volatility 25 (1s) Index', market: 'synthetic_index', submarket: 'random_index' },
-        { symbol: '1HZ50V', name: 'Volatility 50 (1s) Index', market: 'synthetic_index', submarket: 'random_index' },
-        { symbol: '1HZ75V', name: 'Volatility 75 (1s) Index', market: 'synthetic_index', submarket: 'random_index' },
-        { symbol: '1HZ100V', name: 'Volatility 100 (1s) Index', market: 'synthetic_index', submarket: 'random_index' },
-        
-        // Regular Volatility Indices
-        { symbol: 'R_10', name: 'Volatility 10 Index', market: 'synthetic_index', submarket: 'random_index' },
-        { symbol: 'R_25', name: 'Volatility 25 Index', market: 'synthetic_index', submarket: 'random_index' },
-        { symbol: 'R_50', name: 'Volatility 50 Index', market: 'synthetic_index', submarket: 'random_index' },
-        { symbol: 'R_75', name: 'Volatility 75 Index', market: 'synthetic_index', submarket: 'random_index' },
-        { symbol: 'R_100', name: 'Volatility 100 Index', market: 'synthetic_index', submarket: 'random_index' },
-        
-        // Jump Indices
-        { symbol: 'JD10', name: 'Jump 10 Index', market: 'synthetic_index', submarket: 'jump_index' },
-        { symbol: 'JD25', name: 'Jump 25 Index', market: 'synthetic_index', submarket: 'jump_index' },
-        { symbol: 'JD50', name: 'Jump 50 Index', market: 'synthetic_index', submarket: 'jump_index' },
-        { symbol: 'JD75', name: 'Jump 75 Index', market: 'synthetic_index', submarket: 'jump_index' },
-        { symbol: 'JD100', name: 'Jump 100 Index', market: 'synthetic_index', submarket: 'jump_index' },
-        
-        // Other Markets
-        { symbol: 'BOOM1000', name: 'Boom 1000 Index', market: 'synthetic_index', submarket: 'crash_boom' },
-        { symbol: 'CRASH1000', name: 'Crash 1000 Index', market: 'synthetic_index', submarket: 'crash_boom' },
-        { symbol: 'frxEURUSD', name: 'EUR/USD', market: 'forex', submarket: 'major_pairs' },
-    ], []);
+    const fallbackMarkets: MarketData[] = useMemo(
+        () => [
+            // 1-second Volatility Indices (Most Popular)
+            {
+                symbol: '1HZ10V',
+                name: 'Volatility 10 (1s) Index',
+                market: 'synthetic_index',
+                submarket: 'random_index',
+            },
+            {
+                symbol: '1HZ25V',
+                name: 'Volatility 25 (1s) Index',
+                market: 'synthetic_index',
+                submarket: 'random_index',
+            },
+            {
+                symbol: '1HZ50V',
+                name: 'Volatility 50 (1s) Index',
+                market: 'synthetic_index',
+                submarket: 'random_index',
+            },
+            {
+                symbol: '1HZ75V',
+                name: 'Volatility 75 (1s) Index',
+                market: 'synthetic_index',
+                submarket: 'random_index',
+            },
+            {
+                symbol: '1HZ100V',
+                name: 'Volatility 100 (1s) Index',
+                market: 'synthetic_index',
+                submarket: 'random_index',
+            },
+
+            // Regular Volatility Indices
+            { symbol: 'R_10', name: 'Volatility 10 Index', market: 'synthetic_index', submarket: 'random_index' },
+            { symbol: 'R_25', name: 'Volatility 25 Index', market: 'synthetic_index', submarket: 'random_index' },
+            { symbol: 'R_50', name: 'Volatility 50 Index', market: 'synthetic_index', submarket: 'random_index' },
+            { symbol: 'R_75', name: 'Volatility 75 Index', market: 'synthetic_index', submarket: 'random_index' },
+            { symbol: 'R_100', name: 'Volatility 100 Index', market: 'synthetic_index', submarket: 'random_index' },
+
+            // Jump Indices
+            { symbol: 'JD10', name: 'Jump 10 Index', market: 'synthetic_index', submarket: 'jump_index' },
+            { symbol: 'JD25', name: 'Jump 25 Index', market: 'synthetic_index', submarket: 'jump_index' },
+            { symbol: 'JD50', name: 'Jump 50 Index', market: 'synthetic_index', submarket: 'jump_index' },
+            { symbol: 'JD75', name: 'Jump 75 Index', market: 'synthetic_index', submarket: 'jump_index' },
+            { symbol: 'JD100', name: 'Jump 100 Index', market: 'synthetic_index', submarket: 'jump_index' },
+
+            // Other Markets
+            { symbol: 'BOOM1000', name: 'Boom 1000 Index', market: 'synthetic_index', submarket: 'crash_boom' },
+            { symbol: 'CRASH1000', name: 'Crash 1000 Index', market: 'synthetic_index', submarket: 'crash_boom' },
+            { symbol: 'frxEURUSD', name: 'EUR/USD', market: 'forex', submarket: 'major_pairs' },
+        ],
+        []
+    );
 
     // Cleanup subscriptions on unmount
     useEffect(() => {
@@ -220,7 +248,7 @@ const DTrader: React.FC = () => {
     const fetchAvailableMarkets = useCallback(async () => {
         setIsLoadingMarkets(true);
         setAvailableMarkets(fallbackMarkets);
-        
+
         if (!selectedMarket.symbol) {
             setSelectedMarket(fallbackMarkets[0]);
         }
@@ -232,9 +260,9 @@ const DTrader: React.FC = () => {
 
             const response = await Promise.race([
                 chart_api.api.send({ active_symbols: 'brief', product_type: 'basic' }),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('API timeout')), 5000))
+                new Promise((_, reject) => setTimeout(() => reject(new Error('API timeout')), 5000)),
             ]);
-            
+
             if (response && (response as any).active_symbols) {
                 const apiMarkets = (response as any).active_symbols
                     .filter((symbol: any) => ['synthetic_index', 'forex'].includes(symbol.market))
@@ -260,14 +288,14 @@ const DTrader: React.FC = () => {
                             // Everything else
                             return 6;
                         };
-                        
+
                         const priorityA = getMarketPriority(a);
                         const priorityB = getMarketPriority(b);
-                        
+
                         if (priorityA !== priorityB) {
                             return priorityA - priorityB;
                         }
-                        
+
                         // Within same priority, sort alphabetically
                         return a.name.localeCompare(b.name);
                     });
@@ -286,21 +314,39 @@ const DTrader: React.FC = () => {
     // Helper functions
     const getLastDigit = useCallback((price: number, symbol: string): number => {
         const multiplierMap: { [key: string]: number } = {
-            'R_25': 1000, 'R_10': 1000, '1HZ30V': 1000, '1HZ90V': 1000, '1HZ15V': 1000,
-            'R_50': 10000, 'R_75': 10000
+            R_25: 1000,
+            R_10: 1000,
+            '1HZ30V': 1000,
+            '1HZ90V': 1000,
+            '1HZ15V': 1000,
+            R_50: 10000,
+            R_75: 10000,
         };
         const multiplier = multiplierMap[symbol] || 100;
         return Math.round(price * multiplier) % 10;
     }, []);
 
-    const formatPrice = useCallback((price: number): string => {
-        const decimalPlaces: { [key: string]: number } = {
-            '1HZ50V': 2, '1HZ25V': 2, '1HZ10V': 2, '1HZ75V': 2, '1HZ100V': 2, 'R_100': 2,
-            'R_25': 3, 'R_10': 3, '1HZ30V': 3, '1HZ90V': 3, '1HZ15V': 3,
-            'R_50': 4, 'R_75': 4,
-        };
-        return price.toFixed(decimalPlaces[selectedMarket.symbol] || 5);
-    }, [selectedMarket.symbol]);
+    const formatPrice = useCallback(
+        (price: number): string => {
+            const decimalPlaces: { [key: string]: number } = {
+                '1HZ50V': 2,
+                '1HZ25V': 2,
+                '1HZ10V': 2,
+                '1HZ75V': 2,
+                '1HZ100V': 2,
+                R_100: 2,
+                R_25: 3,
+                R_10: 3,
+                '1HZ30V': 3,
+                '1HZ90V': 3,
+                '1HZ15V': 3,
+                R_50: 4,
+                R_75: 4,
+            };
+            return price.toFixed(decimalPlaces[selectedMarket.symbol] || 5);
+        },
+        [selectedMarket.symbol]
+    );
 
     // Memoized digit analysis
     const digitAnalysis = useMemo(() => {
@@ -309,42 +355,54 @@ const DTrader: React.FC = () => {
             const count = digitStats[digit] || 0;
             return totalTicks > 0 ? (count / totalTicks) * 100 : 10;
         });
-        
+
         const maxPercentage = Math.max(...allPercentages);
         const minPercentage = Math.min(...allPercentages.filter(p => p > 0));
-        
+
         return { totalTicks, allPercentages, maxPercentage, minPercentage };
     }, [digitStats]);
 
-    const getDigitPercentage = useCallback((digit: number): string => {
-        return digitAnalysis.allPercentages[digit]?.toFixed(1) || '10.0';
-    }, [digitAnalysis]);
+    const getDigitPercentage = useCallback(
+        (digit: number): string => {
+            return digitAnalysis.allPercentages[digit]?.toFixed(1) || '10.0';
+        },
+        [digitAnalysis]
+    );
 
     // Render digit circle helper
-    const renderDigitCircle = useCallback((digit: number) => {
-        const percentage = getDigitPercentage(digit);
-        const isCurrentLastDigit = digit === lastDigit;
-        const currentPercentage = parseFloat(percentage);
-        
-        const isHighest = Math.abs(currentPercentage - digitAnalysis.maxPercentage) < 0.1 && 
-                         digitAnalysis.maxPercentage > 0 && digitAnalysis.totalTicks > 100;
-        const isLowest = Math.abs(currentPercentage - digitAnalysis.minPercentage) < 0.1 && 
-                        digitAnalysis.minPercentage > 0 && digitAnalysis.totalTicks > 100;
+    const renderDigitCircle = useCallback(
+        (digit: number) => {
+            const percentage = getDigitPercentage(digit);
+            const isCurrentLastDigit = digit === lastDigit;
+            const currentPercentage = parseFloat(percentage);
 
-        return (
-            <div key={digit} className='main-digit-item'>
-                <div className={`main-digit-circle ${isCurrentLastDigit ? 'main-digit-circle--current' : ''} ${isHighest ? 'main-digit-circle--highest' : ''} ${isLowest ? 'main-digit-circle--lowest' : ''}`}>
-                    <div className='main-digit-circle__number'>{digit}</div>
-                    <div className='main-digit-circle__percentage'>{percentage}%</div>
-                </div>
-                {isCurrentLastDigit && (
-                    <div className='main-digit-cursor'>
-                        <div className='main-digit-cursor__arrow'>▲</div>
+            const isHighest =
+                Math.abs(currentPercentage - digitAnalysis.maxPercentage) < 0.1 &&
+                digitAnalysis.maxPercentage > 0 &&
+                digitAnalysis.totalTicks > 100;
+            const isLowest =
+                Math.abs(currentPercentage - digitAnalysis.minPercentage) < 0.1 &&
+                digitAnalysis.minPercentage > 0 &&
+                digitAnalysis.totalTicks > 100;
+
+            return (
+                <div key={digit} className='main-digit-item'>
+                    <div
+                        className={`main-digit-circle ${isCurrentLastDigit ? 'main-digit-circle--current' : ''} ${isHighest ? 'main-digit-circle--highest' : ''} ${isLowest ? 'main-digit-circle--lowest' : ''}`}
+                    >
+                        <div className='main-digit-circle__number'>{digit}</div>
+                        <div className='main-digit-circle__percentage'>{percentage}%</div>
                     </div>
-                )}
-            </div>
-        );
-    }, [lastDigit, getDigitPercentage, digitAnalysis]);
+                    {isCurrentLastDigit && (
+                        <div className='main-digit-cursor'>
+                            <div className='main-digit-cursor__arrow'>▲</div>
+                        </div>
+                    )}
+                </div>
+            );
+        },
+        [lastDigit, getDigitPercentage, digitAnalysis]
+    );
 
     // Simplified subscription handling
     const requestSubscribe = useCallback(async (req: any, callback: (data: any) => void) => {
@@ -352,15 +410,15 @@ const DTrader: React.FC = () => {
             if (subscriptionIdRef.current && chart_api.api) {
                 chart_api.api.forget(subscriptionIdRef.current);
             }
-            
+
             const history = await chart_api.api.send(req);
-            
+
             if (history?.subscription?.id) {
                 subscriptionIdRef.current = history.subscription.id;
             }
-            
+
             if (history) callback(history);
-            
+
             if (req.subscribe === 1) {
                 chart_api.api.onMessage()?.subscribe(({ data }: { data: any }) => {
                     callback(data);
@@ -381,7 +439,7 @@ const DTrader: React.FC = () => {
                 return;
             }
             console.log(`📊 Subscribing to ${symbol} market data...`);
-            
+
             // Clean up any existing subscriptions first
             if (subscriptionIdRef.current && chart_api.api) {
                 console.log(`🧹 Cleaning up previous subscription: ${subscriptionIdRef.current}`);
@@ -424,7 +482,7 @@ const DTrader: React.FC = () => {
 
                         return newHistory;
                     });
-                    
+
                     // Update connection status on first tick
                     setConnectionStatus(`Connected to ${symbol}`);
                 } else if (data.history?.prices) {
@@ -444,10 +502,12 @@ const DTrader: React.FC = () => {
                     });
                     setDigitStats(stats);
                     setLastDigit(getLastDigit(latestPrice, symbol));
-                    
+
                     // Update connection status
                     setConnectionStatus(`Connected to ${symbol}`);
-                    console.log(`✅ ${symbol} data loaded: Price ${latestPrice}, Last digit ${getLastDigit(latestPrice, symbol)}`);
+                    console.log(
+                        `✅ ${symbol} data loaded: Price ${latestPrice}, Last digit ${getLastDigit(latestPrice, symbol)}`
+                    );
                 }
             });
 
@@ -465,21 +525,21 @@ const DTrader: React.FC = () => {
     useEffect(() => {
         if (isConnected && selectedMarket.symbol) {
             console.log(`🔄 Market changed to: ${selectedMarket.symbol}`);
-            
+
             // Clear any existing timeout
             if (subscriptionTimeoutRef.current) {
                 clearTimeout(subscriptionTimeoutRef.current);
             }
-            
+
             // Check rate limiting (minimum 2 seconds between requests)
             const now = Date.now();
             const timeSinceLastRequest = now - lastSubscriptionTimeRef.current;
             const minInterval = 2000; // 2 seconds
-            
+
             if (timeSinceLastRequest < minInterval) {
                 const delay = minInterval - timeSinceLastRequest;
                 console.log(`⏳ Rate limiting: waiting ${delay}ms before next subscription`);
-                
+
                 subscriptionTimeoutRef.current = setTimeout(() => {
                     performMarketSubscription();
                 }, delay);
@@ -487,7 +547,7 @@ const DTrader: React.FC = () => {
                 performMarketSubscription();
             }
         }
-        
+
         function performMarketSubscription() {
             // Reset price data when switching markets
             setCurrentPrice(0);
@@ -496,14 +556,14 @@ const DTrader: React.FC = () => {
             setDigitStats({});
             setPriceHistory([]);
             setConnectionStatus(`Connecting to ${selectedMarket.symbol}...`);
-            
+
             // Update last request time
             lastSubscriptionTimeRef.current = Date.now();
-            
+
             // Subscribe to new market data
             subscribeToMarketData(selectedMarket.symbol);
         }
-        
+
         // Cleanup timeout on unmount or dependency change
         return () => {
             if (subscriptionTimeoutRef.current) {
@@ -511,8 +571,6 @@ const DTrader: React.FC = () => {
             }
         };
     }, [selectedMarket.symbol, isConnected, subscribeToMarketData]);
-
-
 
     // Show error fallback if component has crashed
     if (hasError) {
@@ -562,12 +620,15 @@ const DTrader: React.FC = () => {
         return (
             <div className='dtrader-simple'>
                 {/* View Selection Buttons */}
-                <div className='view-buttons-container' style={{ 
-                    display: 'flex', 
-                    gap: '10px', 
-                    marginBottom: '1rem',
-                    justifyContent: 'center'
-                }}>
+                <div
+                    className='view-buttons-container'
+                    style={{
+                        display: 'flex',
+                        gap: '10px',
+                        marginBottom: '1rem',
+                        justifyContent: 'center',
+                    }}
+                >
                     <button
                         className={`view-button ${activeView === 'dtrader' ? 'active' : ''}`}
                         onClick={() => setActiveView('dtrader')}
@@ -587,13 +648,13 @@ const DTrader: React.FC = () => {
                             transition: 'all 0.2s ease',
                             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                             minWidth: '120px',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
                         }}
                     >
                         <span style={{ fontSize: '16px' }}>📊</span>
                         <span>DTrader</span>
                     </button>
-                    
+
                     <button
                         className={`view-button ${activeView === 'tradingview' ? 'active' : ''}`}
                         onClick={() => setActiveView('tradingview')}
@@ -613,7 +674,7 @@ const DTrader: React.FC = () => {
                             transition: 'all 0.2s ease',
                             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
                             minWidth: '120px',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
                         }}
                     >
                         <span style={{ fontSize: '16px' }}>📈</span>
@@ -623,24 +684,27 @@ const DTrader: React.FC = () => {
 
                 {/* TradingView Chart */}
                 {activeView === 'tradingview' && (
-                    <div className='tradingview-container' style={{ 
-                        width: '100%', 
-                        height: 'calc(100vh - 250px)', 
-                        marginBottom: '1rem', 
-                        borderRadius: '8px', 
-                        overflow: 'hidden',
-                        minHeight: '500px',
-                        maxHeight: '700px'
-                    }}>
-                        <iframe 
-                            id="tradingview_ada94" 
-                            name="tradingview_ada94" 
-                            src="https://charts.deriv.com/deriv?hide-signup=true" 
-                            title="Financial Chart" 
-                            frameBorder="0" 
-                            allowTransparency={true} 
-                            scrolling="no" 
-                            allowFullScreen={true} 
+                    <div
+                        className='tradingview-container'
+                        style={{
+                            width: '100%',
+                            height: 'calc(100vh - 250px)',
+                            marginBottom: '1rem',
+                            borderRadius: '8px',
+                            overflow: 'hidden',
+                            minHeight: '500px',
+                            maxHeight: '700px',
+                        }}
+                    >
+                        <iframe
+                            id='tradingview_ada94'
+                            name='tradingview_ada94'
+                            src='https://charts.deriv.com/deriv?hide-signup=true'
+                            title='Financial Chart'
+                            frameBorder='0'
+                            allowTransparency={true}
+                            scrolling='no'
+                            allowFullScreen={true}
                             style={{ display: 'block', width: '100%', height: '100%' }}
                         />
                     </div>
