@@ -53,13 +53,14 @@ const setLocalStorageToken = async (loginInfo: URLUtils.LoginInfo[], paramsToDel
 
 const setOAuth2LocalStorageToken = async (accessToken: string) => {
     try {
-        localStorage.setItem('authToken', accessToken);
+        const bearerToken = `Bearer ${accessToken}`;
+        localStorage.setItem('authToken', bearerToken);
 
         const api = await generateDerivApiInstance();
 
         if (!api) return;
 
-        const authorize_response = await api.authorize(accessToken);
+        const authorize_response = await api.authorize(bearerToken);
         const { authorize, error } = normalizeAuthorizeResponse(authorize_response);
         api.disconnect();
 
@@ -70,10 +71,10 @@ const setOAuth2LocalStorageToken = async (accessToken: string) => {
             const clientAccounts: Record<string, { loginid: string; token: string; currency: string }> = {};
 
             authorize.account_list.forEach((account: { loginid: string; currency?: string }) => {
-                accountsList[account.loginid] = accessToken;
+                accountsList[account.loginid] = bearerToken;
                 clientAccounts[account.loginid] = {
                     loginid: account.loginid,
-                    token: accessToken,
+                    token: bearerToken,
                     currency: account.currency || '',
                 };
             });
