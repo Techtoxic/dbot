@@ -519,7 +519,8 @@ const AppWrapper = observer(() => {
 
             if (!allAccounts || Object.keys(allAccounts).length === 0) {
                 console.log('No accounts balance data available');
-                const fallbackBalance = parseFloat(client.balance) || 0;
+                const parsedBalance = Number(client.balance);
+                const fallbackBalance = Number.isFinite(parsedBalance) ? parsedBalance : 0;
                 setRealAccountBalance(fallbackBalance);
                 if (simpleCopyTradingService) {
                     simpleCopyTradingService.updateRealAccountBalance(fallbackBalance);
