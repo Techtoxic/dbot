@@ -92,7 +92,6 @@ const setOAuth2LocalStorageToken = async (accessToken: string) => {
 
 export const AuthWrapper = () => {
     const [isAuthComplete, setIsAuthComplete] = React.useState(false);
-    const { loginInfo, paramsToDelete } = URLUtils.getLoginInfoFromURL();
 
     React.useEffect(() => {
         let isMounted = true;
@@ -108,6 +107,7 @@ export const AuthWrapper = () => {
                     return;
                 }
 
+                const { loginInfo, paramsToDelete } = URLUtils.getLoginInfoFromURL();
                 await setLocalStorageToken(loginInfo, paramsToDelete);
                 URLUtils.filterSearchParams(['lang']);
             } finally {
