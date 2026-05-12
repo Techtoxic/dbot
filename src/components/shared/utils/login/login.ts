@@ -1,7 +1,7 @@
 import { forceCorrectAppId } from '../config/config';
 import { generatePKCE, storePKCEData, buildOAuth2URL, type OAuth2Config } from '../oauth/oauth-utils';
 
-const REDIRECT_URI = 'https://dbotke.netlify.app/';
+const REDIRECT_URI = 'https://dbotke.netlify.app';
 
 // OAuth2 configuration following Deriv's documentation at developers.deriv.com
 // Valid Deriv scopes: read, trade, trading_information, payments, admin
