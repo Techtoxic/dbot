@@ -16,7 +16,7 @@ import {
 // Valid scopes: trade, account_manage (NOT read, NOT admin)
 const OAUTH_CONFIG: OAuth2Config = {
     clientId: '33fkQaqUK4Drz5HopZ1Aj',
-    redirectUri: 'https://dbotke.netlify.app/callback',
+    redirectUri: 'https://dbotke.netlify.app/',
     scope: 'trade'
 };
 
