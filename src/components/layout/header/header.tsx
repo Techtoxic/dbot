@@ -7,7 +7,6 @@ import Modal from '@/components/shared_ui/modal';
 import useActiveAccount from '@/hooks/api/account/useActiveAccount';
 import { useApiBase } from '@/hooks/useApiBase';
 import { useStore } from '@/hooks/useStore';
-import { setIsAuthorizing as setIsAuthorizingStream } from '@/external/bot-skeleton/services/api/observables/connection-status-stream';
 import { StandaloneCircleUserRegularIcon } from '@deriv/quill-icons/Standalone';
 import { Localize, useTranslations } from '@deriv-com/translations';
 import { Header, useDevice, Wrapper } from '@deriv-com/ui';
@@ -141,7 +140,7 @@ const InfoIcon = () => {
 
 const AppHeader = observer(() => {
     const { isDesktop } = useDevice();
-    const { isAuthorizing, isAuthorized, activeLoginid } = useApiBase();
+    const { isAuthorizing, isAuthorized, activeLoginid, setIsAuthorizing } = useApiBase();
     const { client } = useStore() ?? {};
     const [authTimeout, setAuthTimeout] = useState(false);
 
@@ -183,7 +182,7 @@ const AppHeader = observer(() => {
         const timer = setTimeout(() => {
             if (isAuthorizing && !activeLoginid && !isAuthorized) {
                 setAuthTimeout(true);
-                setIsAuthorizingStream(false);
+                setIsAuthorizing(false);
             }
         }, 5000);
 
@@ -193,36 +192,36 @@ const AppHeader = observer(() => {
         }
 
         return () => clearTimeout(timer);
-    }, [isAuthorizing, activeLoginid, isAuthorized, authTimeout, isOAuthPending]);
+    }, [isAuthorizing, activeLoginid, isAuthorized, authTimeout, isOAuthPending, setIsAuthorizing]);
 
     // Handle signup via OAuth
     const handleSignup = useCallback(async () => {
         try {
-            setIsAuthorizingStream(true);
+            setIsAuthorizing(true);
             const oauthUrl = await generateOAuthURL('registration');
             if (oauthUrl) {
                 window.location.replace(oauthUrl);
             } else {
                 console.error('Failed to generate OAuth URL for signup');
-                setIsAuthorizingStream(false);
+                setIsAuthorizing(false);
             }
         } catch (error) {
             console.error('Signup redirection failed:', error);
-            setIsAuthorizingStream(false);
+            setIsAuthorizing(false);
         }
-    }, []);
+    }, [setIsAuthorizing]);
 
     // Handle login via OAuth
     const handleLogin = useCallback(async () => {
         try {
-            setIsAuthorizingStream(true);
+            setIsAuthorizing(true);
             const { redirectToLogin } = await import('@/components/shared/utils/login/login');
             redirectToLogin();
         } catch (error) {
             console.error('Login redirection failed:', error);
-            setIsAuthorizingStream(false);
+            setIsAuthorizing(false);
         }
-    }, []);
+    }, [setIsAuthorizing]);
 
     // Render account info and actions depending on auth state
     const renderAccountSection = () => {

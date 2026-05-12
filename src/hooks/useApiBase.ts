@@ -6,6 +6,7 @@ import {
     connectionStatus$,
     isAuthorized$,
     isAuthorizing$,
+    setIsAuthorizing,
 } from '@/external/bot-skeleton/services/api/observables/connection-status-stream';
 import { TAuthData } from '@/types/api-types';
 
@@ -46,5 +47,5 @@ export const useApiBase = () => {
         };
     }, []);
 
-    return { connectionStatus, isAuthorized, isAuthorizing, accountList, authData, activeLoginid };
+    return { connectionStatus, isAuthorized, isAuthorizing, accountList, authData, activeLoginid, setIsAuthorizing };
 };
