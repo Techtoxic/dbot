@@ -287,7 +287,7 @@ class DTraderErrorBoundary extends React.Component<
 }
 
 const AppWrapper = observer(() => {
-    const { connectionStatus } = useApiBase();
+    const { connectionStatus, isAuthorized, isAuthorizing } = useApiBase();
     const { client, dashboard, load_modal, run_panel, summary_card } = useStore();
     const { active_tab, is_chart_modal_visible, setActiveTab } = dashboard;
     const { onEntered } = load_modal;
@@ -501,6 +501,10 @@ const AppWrapper = observer(() => {
                 return;
             }
 
+            if (!isAuthorized || isAuthorizing) {
+                return;
+            }
+
             setIsLoadingBalance(true);
 
             // Get all accounts and find the real account (not virtual)
@@ -563,7 +567,7 @@ const AppWrapper = observer(() => {
         } finally {
             setIsLoadingBalance(false);
         }
-    }, [client]);
+    }, [client, isAuthorized, isAuthorizing]);
 
     // Copy trading toggle
     const handleCopyTradingToggle = useCallback(async () => {
@@ -593,6 +597,10 @@ const AppWrapper = observer(() => {
     // Fetch real account balance on component mount and set up copy trading
     useEffect(() => {
         try {
+            if (!isAuthorized) {
+                return;
+            }
+
             // Add a small delay to ensure client data is loaded
             const timer = setTimeout(() => {
                 fetchRealAccountBalance();
@@ -615,18 +623,22 @@ const AppWrapper = observer(() => {
         } catch (error) {
             console.error('Error in copy trading setup:', error);
         }
-    }, [fetchRealAccountBalance, copyTradingEnabled]);
+    }, [fetchRealAccountBalance, copyTradingEnabled, isAuthorized]);
 
     // Refresh balance when all_accounts_balance changes
     useEffect(() => {
         try {
+            if (!isAuthorized) {
+                return;
+            }
+
             if (client?.all_accounts_balance?.accounts) {
                 fetchRealAccountBalance();
             }
         } catch (error) {
             console.error('Error refreshing balance:', error);
         }
-    }, [fetchRealAccountBalance, client?.all_accounts_balance]);
+    }, [fetchRealAccountBalance, client?.all_accounts_balance, isAuthorized]);
 
     // Set up global demo trade emitter for copy trading
     useEffect(() => {
