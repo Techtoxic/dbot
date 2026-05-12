@@ -1,13 +1,24 @@
 import React from 'react';
 
-interface AccountChangeModalProps {
+type TAccountChangeModalProps = {
     isOpen: boolean;
+    onReload: () => void;
     onClose: () => void;
-    onConfirm: () => void;
-}
+};
 
-const AccountChangeModal: React.FC<AccountChangeModalProps> = ({ isOpen, onClose, onConfirm }) => {
-    if (!isOpen) return null;
+const AccountChangeModal: React.FC<TAccountChangeModalProps> = ({ isOpen, onReload, onClose }) => {
+    const handleClose = () => {
+        onClose();
+        onReload();
+    };
+
+    const handleReload = () => {
+        onReload();
+    };
+
+    if (!isOpen) {
+        return null;
+    }
 
     return (
         <div
@@ -23,7 +34,7 @@ const AccountChangeModal: React.FC<AccountChangeModalProps> = ({ isOpen, onClose
                 justifyContent: 'center',
                 zIndex: 9999,
             }}
-            onClick={onClose}
+            onClick={handleClose}
         >
             <div
                 style={{
@@ -36,39 +47,24 @@ const AccountChangeModal: React.FC<AccountChangeModalProps> = ({ isOpen, onClose
                 }}
                 onClick={(e) => e.stopPropagation()}
             >
-                <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 600 }}>
-                    Account Changed
-                </h3>
-                <p style={{ margin: '0 0 24px 0', color: '#666', fontSize: '14px' }}>
-                    Your account has been changed in another tab. Would you like to refresh to sync your session?
+                <p style={{ margin: '0 0 24px 0', color: '#333', fontSize: '14px', lineHeight: '1.5' }}>
+                    Your account has changed in another tab. Reloading will switch to the new account and stop the running bot in this tab.
                 </p>
-                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
                     <button
-                        onClick={onClose}
+                        onClick={handleReload}
                         style={{
-                            padding: '8px 16px',
-                            borderRadius: '4px',
-                            border: '1px solid #ccc',
-                            backgroundColor: 'white',
-                            cursor: 'pointer',
-                            fontSize: '14px',
-                        }}
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={onConfirm}
-                        style={{
-                            padding: '8px 16px',
+                            padding: '12px 32px',
                             borderRadius: '4px',
                             border: 'none',
                             backgroundColor: '#ff444f',
                             color: 'white',
                             cursor: 'pointer',
                             fontSize: '14px',
+                            fontWeight: 500,
                         }}
                     >
-                        Refresh
+                        Reload
                     </button>
                 </div>
             </div>

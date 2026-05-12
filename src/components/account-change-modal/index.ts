@@ -1,1 +1,1 @@
-export { default as AccountChangeModal } from './account-change-modal';
+export { default } from './account-change-modal';
