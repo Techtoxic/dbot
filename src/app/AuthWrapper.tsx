@@ -1,4 +1,5 @@
 import React from 'react';
+import Cookies from 'js-cookie';
 import ChunkLoader from '@/components/loader/chunk-loader';
 import { generateDerivApiInstance } from '@/external/bot-skeleton/services/api/appId';
 import { normalizeAuthorizeResponse } from '@/external/bot-skeleton/services/api/authorize-response';
@@ -6,6 +7,7 @@ import { api_base } from '@/external/bot-skeleton';
 import { handleOAuthCallback } from '@/components/shared/utils/oauth/callback-handler';
 import { localize } from '@deriv-com/translations';
 import { URLUtils } from '@deriv-com/utils';
+import { requestLegacyToken } from '@deriv-com/auth-client';
 import App from './App';
 
 const setLocalStorageToken = async (loginInfo: URLUtils.LoginInfo[], paramsToDelete: string[]) => {
@@ -53,36 +55,45 @@ const setLocalStorageToken = async (loginInfo: URLUtils.LoginInfo[], paramsToDel
 
 const setOAuth2LocalStorageToken = async (accessToken: string) => {
     try {
-        const bearerToken = `Bearer ${accessToken}`;
-        localStorage.setItem('authToken', bearerToken);
+        const legacyTokens = await requestLegacyToken(accessToken);
 
-        const api = await generateDerivApiInstance();
+        const accountsList: Record<string, string> = {};
+        const clientAccounts: Record<string, { loginid: string; token: string; currency: string }> = {};
 
-        if (!api) return;
+        Object.entries(legacyTokens).forEach(([key, value]) => {
+            if (!key.startsWith('acct')) return;
 
-        const authorize_response = await api.authorize(bearerToken);
-        const { authorize, error } = normalizeAuthorizeResponse(authorize_response);
-        api.disconnect();
+            const tokenKey = key.replace('acct', 'token');
+            const currencyKey = key.replace('acct', 'cur');
+            const token = legacyTokens[tokenKey as keyof typeof legacyTokens];
 
-        if (authorize && !error && authorize.account_list?.length) {
-            localStorage.setItem('callback_token', JSON.stringify(authorize));
+            if (typeof token !== 'string' || !token) return;
 
-            const accountsList: Record<string, string> = {};
-            const clientAccounts: Record<string, { loginid: string; token: string; currency: string }> = {};
+            accountsList[value] = token;
+            clientAccounts[value] = {
+                loginid: value,
+                token,
+                currency: (legacyTokens[currencyKey as keyof typeof legacyTokens] as string) || '',
+            };
+        });
 
-            authorize.account_list.forEach((account: { loginid: string; currency?: string }) => {
-                accountsList[account.loginid] = bearerToken;
-                clientAccounts[account.loginid] = {
-                    loginid: account.loginid,
-                    token: bearerToken,
-                    currency: account.currency || '',
-                };
-            });
-
-            const firstAccount = authorize.account_list[0];
-            localStorage.setItem('clientAccounts', JSON.stringify(clientAccounts));
+        if (legacyTokens.token1 && legacyTokens.acct1) {
+            localStorage.setItem('authToken', legacyTokens.token1);
+            localStorage.setItem('active_loginid', legacyTokens.acct1);
             localStorage.setItem('accountsList', JSON.stringify(accountsList));
-            localStorage.setItem('active_loginid', firstAccount.loginid);
+            localStorage.setItem('clientAccounts', JSON.stringify(clientAccounts));
+            localStorage.setItem('callback_token', JSON.stringify(legacyTokens));
+
+            const domains = ['deriv.com', 'deriv.dev', 'binary.sx', 'pages.dev', 'localhost', 'deriv.be', 'deriv.me'];
+            const currentDomain = window.location.hostname.split('.').slice(-2).join('.');
+            if (domains.includes(currentDomain)) {
+                Cookies.set('logged_state', 'true', {
+                    expires: 30,
+                    path: '/',
+                    domain: currentDomain,
+                    secure: true,
+                });
+            }
         }
 
         await api_base.init(true);
