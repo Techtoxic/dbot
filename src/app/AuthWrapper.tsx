@@ -103,7 +103,11 @@ export const AuthWrapper = () => {
                 if (callbackResult.success && callbackResult.flow === 'oauth2' && callbackResult.accessToken) {
                     await setOAuth2LocalStorageToken(callbackResult.accessToken);
                     const query_param_currency = sessionStorage.getItem('query_param_currency');
-                    window.location.assign(query_param_currency ? `/?account=${query_param_currency}` : '/');
+                    window.history.replaceState(
+                        {},
+                        '',
+                        query_param_currency ? `/?account=${query_param_currency}` : '/'
+                    );
                     return;
                 }
 
