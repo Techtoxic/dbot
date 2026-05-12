@@ -625,7 +625,7 @@ const AppWrapper = observer(() => {
         } catch (error) {
             console.error('Error refreshing balance:', error);
         }
-    }, [fetchRealAccountBalance, client?.all_accounts_balance?.accounts]);
+    }, [fetchRealAccountBalance, client?.all_accounts_balance]);
 
     // Set up global demo trade emitter for copy trading
     useEffect(() => {
