@@ -111,19 +111,19 @@ const AnalysistoolComponent: React.FC<{ isActive?: boolean }> = ({ isActive = tr
         { value: 'under_9', label: 'Under 9', description: '0-8 win' },
     ];
 
-    // Cleanup all subscriptions on unmount
-    useEffect(() => {
-        return () => {
-            try {
-                if (subscriptionIdRef.current && chart_api?.api) {
-                    chart_api.api.forget(subscriptionIdRef.current);
-                }
-                const sub = subscriptions[subscriptionIdRef.current];
-                sub?.unsubscribe?.();
-                if (subscriptionIdRef.current) delete subscriptions[subscriptionIdRef.current];
-            } catch {}
-        };
-    }, []);
+// Cleanup all subscriptions on unmount
+useEffect(() => {
+    return () => {
+        try {
+            if (subscriptionIdRef.current && chart_api?.api) {
+                chart_api.api.forget(subscriptionIdRef.current);
+            }
+            const sub = subscriptions[subscriptionIdRef.current];
+            sub?.unsubscribe?.();
+            if (subscriptionIdRef.current) delete subscriptions[subscriptionIdRef.current];
+        } catch {}
+    };
+}, []);
 
     // Fetch available markets from API with timeout and better error handling
     const fetchAvailableMarkets = useCallback(async () => {

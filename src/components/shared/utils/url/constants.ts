@@ -7,7 +7,8 @@ const mesoflix_url = 'mesoflix.online';
 const scofieldtradings_url = 'scofieldtradings.netlify.app'; // Your domain
 
 const supported_domains = [deriv_com_url, deriv_me_url, deriv_be_url, mesoflix_url, scofieldtradings_url];
-const domain_url_initial = (isBrowser() && window.location.hostname.replace(/^app\./, '').replace(/^bot\./, '')) || '';
+const domain_url_initial =
+    (isBrowser() && window.location.hostname.replace(/^app\./, '').replace(/^bot\./, '')) || '';
 const domain_url = supported_domains.includes(domain_url_initial) ? domain_url_initial : deriv_com_url;
 
 export const deriv_urls = Object.freeze({

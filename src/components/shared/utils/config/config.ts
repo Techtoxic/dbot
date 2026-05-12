@@ -69,9 +69,9 @@ export const getDefaultAppIdAndUrl = () => {
     const current_domain = getCurrentProductionDomain() ?? '';
     const app_id = domain_app_ids[current_domain as keyof typeof domain_app_ids] ?? APP_IDS.LIVE;
 
-    console.log('🔍 [getDefaultAppIdAndUrl] Current domain:', current_domain);
-    console.log('🔍 [getDefaultAppIdAndUrl] Mapped app_id:', app_id);
-    console.log('🔍 [getDefaultAppIdAndUrl] Server URL:', server_url);
+    console.log("🔍 [getDefaultAppIdAndUrl] Current domain:", current_domain);
+    console.log("🔍 [getDefaultAppIdAndUrl] Mapped app_id:", app_id);
+    console.log("🔍 [getDefaultAppIdAndUrl] Server URL:", server_url);
 
     return { app_id, server_url };
 };
@@ -81,13 +81,13 @@ export const getAppId = () => {
 
     // Force the correct app ID if it's wrong or missing
     if (!app_id || app_id === '69811' || app_id === '96171' || app_id !== CURRENT_APP_ID) {
-        console.warn('⚠️ App ID is invalid or outdated, forcing correct App ID...');
-        console.log('🔄 Old App ID:', app_id, '-> New App ID:', CURRENT_APP_ID);
+        console.warn("⚠️ App ID is invalid or outdated, forcing correct App ID...");
+        console.log("🔄 Old App ID:", app_id, "-> New App ID:", CURRENT_APP_ID);
         app_id = CURRENT_APP_ID;
         window.localStorage.setItem('config.app_id', app_id);
     }
 
-    console.log('🔍 [config.ts] Using App ID:', app_id);
+    console.log("🔍 [config.ts] Using App ID:", app_id);
     return app_id;
 };
 
@@ -125,11 +125,11 @@ export const getDebugServiceWorker = () => !!parseInt(window.localStorage.getIte
 export const forceCorrectAppId = () => {
     const currentAppId = window.localStorage.getItem('config.app_id');
     if (currentAppId !== CURRENT_APP_ID) {
-        console.log('🔄 Forcing correct App ID update...');
-        console.log('🗑️ Clearing old App ID:', currentAppId);
+        console.log("🔄 Forcing correct App ID update...");
+        console.log("🗑️ Clearing old App ID:", currentAppId);
         window.localStorage.removeItem('config.app_id');
         window.localStorage.setItem('config.app_id', CURRENT_APP_ID);
-        console.log('✅ Set new App ID:', CURRENT_APP_ID);
+        console.log("✅ Set new App ID:", CURRENT_APP_ID);
     }
 };
 
@@ -137,7 +137,7 @@ export const generateOAuthURL = () => {
     const { getOauthURL } = URLUtils;
     const oauth_url = getOauthURL();
     const original_url = new URL(oauth_url);
-    const configured_server_url =
+    const configured_server_url = 
         LocalStorageUtils.getValue(LocalStorageConstants.configServerURL) ||
         localStorage.getItem('config.server_url') ||
         original_url.hostname;

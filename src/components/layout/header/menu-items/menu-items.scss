@@ -1,10 +1,7 @@
 .app-header__menu {
     gap: 0.8rem;
     padding: 1.25rem 1.25rem 1.25rem 1.5rem;
-    transition:
-        color 0.15s ease,
-        background-color 0.15s ease,
-        border-color 0.15s ease;
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
 
     body.theme--light &,
     body.theme--light & span,

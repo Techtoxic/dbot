@@ -24,9 +24,9 @@ import './copy-trading.css';
 
 const Chart = lazy(() => import('../chart'));
 const Tutorial = lazy(() => import('../tutorials'));
-const AnalysistoolComponent = lazy(() => import('../../components/analysistool/analysis')) as React.LazyExoticComponent<
-    React.FC<{ isActive?: boolean }>
->;
+const AnalysistoolComponent = lazy(
+    () => import('../../components/analysistool/analysis')
+) as React.LazyExoticComponent<React.FC<{ isActive?: boolean }>>;
 
 // Debug logging gate
 const DEBUG = false;
@@ -114,12 +114,7 @@ const BotBuilderIcon = () => (
         <rect x='4' y='4' width='5.5' height='5.5' rx='1.2' fill='currentColor' />
         <rect x='14.5' y='4' width='5.5' height='5.5' rx='1.2' fill='currentColor' opacity='0.74' />
         <rect x='9.25' y='14.5' width='5.5' height='5.5' rx='1.2' fill='currentColor' opacity='0.9' />
-        <path
-            d='M9 7.5H15M12 10.5V14M7 7.8V11.5M17 7.8V11.5'
-            stroke='currentColor'
-            strokeWidth='1.6'
-            strokeLinecap='round'
-        />
+        <path d='M9 7.5H15M12 10.5V14M7 7.8V11.5M17 7.8V11.5' stroke='currentColor' strokeWidth='1.6' strokeLinecap='round' />
     </svg>
 );
 
@@ -127,13 +122,7 @@ const ChartsIcon = () => (
     <svg width='18' height='18' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
         <path d='M4 19H20' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' />
         <path d='M4 19V5' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' />
-        <path
-            d='M6 15L9 12L12 14L17 8'
-            stroke='currentColor'
-            strokeWidth='1.8'
-            strokeLinecap='round'
-            strokeLinejoin='round'
-        />
+        <path d='M6 15L9 12L12 14L17 8' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round' />
         <circle cx='6' cy='15' r='1.1' fill='currentColor' />
         <circle cx='9' cy='12' r='1.1' fill='currentColor' opacity='0.85' />
         <circle cx='12' cy='14' r='1.1' fill='currentColor' opacity='0.85' />
@@ -177,12 +166,7 @@ const TradingHubIcon = () => (
         <circle cx='18.5' cy='7' r='1.25' fill='currentColor' opacity='0.7' />
         <circle cx='5.5' cy='17' r='1.25' fill='currentColor' opacity='0.7' />
         <circle cx='18.5' cy='17' r='1.25' fill='currentColor' opacity='0.7' />
-        <path
-            d='M6.5 7.8L10 10M17.5 7.8L14 10M6.5 16.2L10 14M17.5 16.2L14 14'
-            stroke='currentColor'
-            strokeWidth='1.4'
-            strokeLinecap='round'
-        />
+        <path d='M6.5 7.8L10 10M17.5 7.8L14 10M6.5 16.2L10 14M17.5 16.2L14 14' stroke='currentColor' strokeWidth='1.4' strokeLinecap='round' />
     </svg>
 );
 
@@ -224,13 +208,7 @@ const DTraderIcon = () => (
     <svg width='18' height='18' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
         <path d='M4 19V5' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' />
         <path d='M4 19H20' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' />
-        <path
-            d='M6.5 15L10 11L13 14L18 8.5'
-            stroke='currentColor'
-            strokeWidth='1.8'
-            strokeLinecap='round'
-            strokeLinejoin='round'
-        />
+        <path d='M6.5 15L10 11L13 14L18 8.5' stroke='currentColor' strokeWidth='1.8' strokeLinecap='round' strokeLinejoin='round' />
         <circle cx='10' cy='11' r='1.1' fill='currentColor' />
         <circle cx='13' cy='14' r='1.1' fill='currentColor' opacity='0.82' />
         <circle cx='18' cy='8.5' r='1.1' fill='currentColor' />
@@ -471,7 +449,7 @@ const AppWrapper = observer(() => {
                 const rawTypes = xmlBlocks.map(node => node.getAttribute('type'));
                 const blockTypes: string[] = Array.from(new Set(rawTypes.filter((t): t is string => !!t)));
                 const blocksRegistry: Record<string, any> = Blockly.Blocks as any;
-                blockTypes.forEach(type => {
+                blockTypes.forEach((type) => {
                     if (!Object.prototype.hasOwnProperty.call(blocksRegistry, type)) {
                         blocksRegistry[type] = {
                             init() {
@@ -730,22 +708,16 @@ const AppWrapper = observer(() => {
                                                     handleBotClick(bot);
                                                 }}
                                             >
-                                                <div
-                                                    style={{
-                                                        width: 32,
-                                                        height: 32,
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        flexShrink: 0,
-                                                        marginBottom: 6,
-                                                    }}
-                                                >
+                                                <div style={{ width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginBottom: 6 }}>
                                                     <BotIcon />
                                                 </div>
                                                 <div className='free-bot__details'>
-                                                    <h3 className='free-bot__title'>{bot.title}</h3>
-                                                    <div className='free-bot__description'>Quick-load XML</div>
+                                                    <h3 className='free-bot__title'>
+                                                        {bot.title}
+                                                    </h3>
+                                                    <div className='free-bot__description'>
+                                                        Quick-load XML
+                                                    </div>
                                                 </div>
                                             </li>
                                         ))}
@@ -805,277 +777,249 @@ const AppWrapper = observer(() => {
                         </div>
 
                         {/* Analysis Tool Tab - Fifth */}
-                        {
-                            (
-                                <div
-                                    label={
-                                        <>
-                                            <AnalysisToolIcon />
-                                            <Localize i18n_default_text='Analysis Tool' />
-                                        </>
-                                    }
-                                    id='id-analysis-tool'
-                                >
-                                    <div
-                                        className={classNames('dashboard__chart-wrapper', {
-                                            'dashboard__chart-wrapper--expanded': is_drawer_open && isDesktop,
-                                            'dashboard__chart-wrapper--modal': is_chart_modal_visible && isDesktop,
-                                        })}
-                                    >
-                                        <Suspense fallback={<ChunkLoader message='Loading analysis tool...' />}>
-                                            <AnalysistoolComponent isActive={active_tab === DBOT_TABS.ANALYSIS_TOOL} />
-                                        </Suspense>
-                                    </div>
-                                </div>
-                            ) as React.ReactElement
-                        }
+                        {(
+                        <div
+                            label={
+                                <>
+                                    <AnalysisToolIcon />
+                                    <Localize i18n_default_text='Analysis Tool' />
+                                </>
+                            }
+                            id='id-analysis-tool'
+                        >
+                            <div
+                                className={classNames('dashboard__chart-wrapper', {
+                                    'dashboard__chart-wrapper--expanded': is_drawer_open && isDesktop,
+                                    'dashboard__chart-wrapper--modal': is_chart_modal_visible && isDesktop,
+                                })}
+                            >
+                                <Suspense fallback={<ChunkLoader message='Loading analysis tool...' />}>
+                                    <AnalysistoolComponent isActive={active_tab === DBOT_TABS.ANALYSIS_TOOL} />
+                                </Suspense>
+                            </div>
+                        </div>
+                        ) as React.ReactElement}
 
                         {/* The rest of the tabs follow in their original order */}
-                        {
-                            (
-                                <div
-                                    label={
-                                        <>
-                                            <TutorialsIcon />
-                                            <Localize i18n_default_text='Tutorials' />
-                                        </>
-                                    }
-                                    id='id-tutorials'
-                                >
-                                    <Suspense
-                                        fallback={
-                                            <ChunkLoader message={localize('Please wait, loading tutorials...')} />
-                                        }
-                                    >
-                                        <Tutorial handleTabChange={handleTabChange} />
-                                    </Suspense>
+                        {(
+                        <div
+                            label={
+                                <>
+                                    <TutorialsIcon />
+                                    <Localize i18n_default_text='Tutorials' />
+                                </>
+                            }
+                            id='id-tutorials'
+                        >
+                            <Suspense
+                                fallback={<ChunkLoader message={localize('Please wait, loading tutorials...')} />}
+                            >
+                                <Tutorial handleTabChange={handleTabChange} />
+                            </Suspense>
+                        </div>
+                        ) as React.ReactElement}
+                        {(
+                        <div
+                            label={
+                                <>
+                                    <BulkTradingIcon />
+                                    <Localize i18n_default_text='Bulk Trading' />
+                                </>
+                            }
+                            id='id-bulk-trading'
+                        >
+                            <div className='bulk-trading'>
+                                <h2 className='bulk-trading__heading'>
+                                    <Localize i18n_default_text='Bulk Trading Bot' />
+                                </h2>
+                                <div className='bulk-trading__description'>
+                                    <p>
+                                        <Localize i18n_default_text='This pre-built bot demonstrates simultaneous contract purchases for diversified trading strategies.' />
+                                    </p>
                                 </div>
-                            ) as React.ReactElement
-                        }
-                        {
-                            (
-                                <div
-                                    label={
-                                        <>
-                                            <BulkTradingIcon />
-                                            <Localize i18n_default_text='Bulk Trading' />
-                                        </>
-                                    }
-                                    id='id-bulk-trading'
-                                >
-                                    <div className='bulk-trading'>
-                                        <h2 className='bulk-trading__heading'>
-                                            <Localize i18n_default_text='Bulk Trading Bot' />
-                                        </h2>
-                                        <div className='bulk-trading__description'>
-                                            <p>
-                                                <Localize i18n_default_text='This pre-built bot demonstrates simultaneous contract purchases for diversified trading strategies.' />
-                                            </p>
-                                        </div>
-                                        <div className='bulk-trading__content-wrapper'>
-                                            <div className='bulk-trading__bot-preview'>
-                                                <h3>
-                                                    <Localize i18n_default_text='Pre-built Bulk Trading Strategy' />
-                                                </h3>
-                                                <ul className='bulk-trading__features'>
-                                                    <li>
-                                                        ✅{' '}
-                                                        <Localize i18n_default_text='Purchases 5 contracts simultaneously' />
-                                                    </li>
-                                                    <li>
-                                                        ✅{' '}
-                                                        <Localize i18n_default_text='Risk diversification across multiple positions' />
-                                                    </li>
-                                                    <li>
-                                                        ✅{' '}
-                                                        <Localize i18n_default_text='Automated profit/loss management' />
-                                                    </li>
-                                                    <li>
-                                                        ✅{' '}
-                                                        <Localize i18n_default_text='Customizable contract types and amounts' />
-                                                    </li>
-                                                </ul>
-                                                <button
-                                                    className='bulk-trading__load-btn'
-                                                    onClick={() => handleBulkTradingBotClick()}
-                                                >
-                                                    <Localize i18n_default_text='Load Bulk Trading Bot' />
-                                                </button>
-                                            </div>
-                                        </div>
+                                <div className='bulk-trading__content-wrapper'>
+                                    <div className='bulk-trading__bot-preview'>
+                                        <h3>
+                                            <Localize i18n_default_text='Pre-built Bulk Trading Strategy' />
+                                        </h3>
+                                        <ul className='bulk-trading__features'>
+                                            <li>
+                                                ✅ <Localize i18n_default_text='Purchases 5 contracts simultaneously' />
+                                            </li>
+                                            <li>
+                                                ✅{' '}
+                                                <Localize i18n_default_text='Risk diversification across multiple positions' />
+                                            </li>
+                                            <li>
+                                                ✅ <Localize i18n_default_text='Automated profit/loss management' />
+                                            </li>
+                                            <li>
+                                                ✅{' '}
+                                                <Localize i18n_default_text='Customizable contract types and amounts' />
+                                            </li>
+                                        </ul>
+                                        <button
+                                            className='bulk-trading__load-btn'
+                                            onClick={() => handleBulkTradingBotClick()}
+                                        >
+                                            <Localize i18n_default_text='Load Bulk Trading Bot' />
+                                        </button>
                                     </div>
                                 </div>
-                            ) as React.ReactElement
-                        }
-                        {
-                            (
-                                <div
-                                    label={
-                                        <>
-                                            <CopyTradingIcon />
-                                            <Localize i18n_default_text='Copy Trading' />
-                                        </>
-                                    }
-                                    id='id-copy-trading'
-                                >
-                                    <div className='copy-trading'>
-                                        <h2 className='copy-trading__heading'>
-                                            <Localize i18n_default_text='Copy Trading' />
-                                        </h2>
-                                        <div className='copy-trading__description'>
-                                            <p>
-                                                <Localize i18n_default_text='Automatically copy all your demo trades to your real account. Enable this feature to mirror your demo trading activity to real money.' />
-                                            </p>
-                                        </div>
-                                        <div className='copy-trading__content-wrapper'>
-                                            <div className='copy-trading__status'>
-                                                <div className='copy-trading__account-info'>
-                                                    <div className='copy-trading__account'>
-                                                        <h3>Real Account Balance</h3>
-                                                        <div className='copy-trading__balance'>
-                                                            <span className='copy-trading__balance-label'>
-                                                                Balance:
-                                                            </span>
-                                                            <span className='copy-trading__balance-amount'>
-                                                                {isLoadingBalance
-                                                                    ? 'Loading...'
-                                                                    : `$${realAccountBalance.toFixed(2)}`}
-                                                            </span>
-                                                            <button
-                                                                onClick={fetchRealAccountBalance}
-                                                                className='copy-trading__refresh-btn'
-                                                                disabled={isLoadingBalance}
-                                                                style={{
-                                                                    marginLeft: '10px',
-                                                                    padding: '4px 8px',
-                                                                    fontSize: '12px',
-                                                                    background: '#4CAF50',
-                                                                    color: 'white',
-                                                                    border: 'none',
-                                                                    borderRadius: '4px',
-                                                                    cursor: isLoadingBalance
-                                                                        ? 'not-allowed'
-                                                                        : 'pointer',
-                                                                }}
-                                                            >
-                                                                {isLoadingBalance ? '...' : 'Refresh'}
-                                                            </button>
-                                                        </div>
-                                                        <div className='copy-trading__status-indicator'>
-                                                            <span
-                                                                className={`copy-trading__status-dot ${realAccountBalance > 0 ? 'real' : 'inactive'}`}
-                                                            ></span>
-                                                            <span>
-                                                                {realAccountBalance > 0 ? 'Active' : 'Inactive'}
-                                                            </span>
-                                                        </div>
-                                                    </div>
+                            </div>
+                        </div>
+                        ) as React.ReactElement}
+                        {(
+                        <div
+                            label={
+                                <>
+                                    <CopyTradingIcon />
+                                    <Localize i18n_default_text='Copy Trading' />
+                                </>
+                            }
+                            id='id-copy-trading'
+                        >
+                            <div className='copy-trading'>
+                                <h2 className='copy-trading__heading'>
+                                    <Localize i18n_default_text='Copy Trading' />
+                                </h2>
+                                <div className='copy-trading__description'>
+                                    <p>
+                                        <Localize i18n_default_text='Automatically copy all your demo trades to your real account. Enable this feature to mirror your demo trading activity to real money.' />
+                                    </p>
+                                </div>
+                                <div className='copy-trading__content-wrapper'>
+                                    <div className='copy-trading__status'>
+                                        <div className='copy-trading__account-info'>
+                                            <div className='copy-trading__account'>
+                                                <h3>Real Account Balance</h3>
+                                                <div className='copy-trading__balance'>
+                                                    <span className='copy-trading__balance-label'>Balance:</span>
+                                                    <span className='copy-trading__balance-amount'>
+                                                        {isLoadingBalance
+                                                            ? 'Loading...'
+                                                            : `$${realAccountBalance.toFixed(2)}`}
+                                                    </span>
+                                                    <button
+                                                        onClick={fetchRealAccountBalance}
+                                                        className='copy-trading__refresh-btn'
+                                                        disabled={isLoadingBalance}
+                                                        style={{
+                                                            marginLeft: '10px',
+                                                            padding: '4px 8px',
+                                                            fontSize: '12px',
+                                                            background: '#4CAF50',
+                                                            color: 'white',
+                                                            border: 'none',
+                                                            borderRadius: '4px',
+                                                            cursor: isLoadingBalance ? 'not-allowed' : 'pointer',
+                                                        }}
+                                                    >
+                                                        {isLoadingBalance ? '...' : 'Refresh'}
+                                                    </button>
                                                 </div>
-                                                <div className='copy-trading__controls'>
-                                                    <div className='copy-trading__toggle'>
-                                                        <label className='copy-trading__toggle-label'>
-                                                            <input
-                                                                type='checkbox'
-                                                                checked={copyTradingEnabled}
-                                                                onChange={handleCopyTradingToggle}
-                                                                disabled={realAccountBalance === 0}
-                                                            />
-                                                            <span className='copy-trading__toggle-slider'></span>
-                                                            <span className='copy-trading__toggle-text'>
-                                                                {copyTradingEnabled
-                                                                    ? 'Copy Trading ON'
-                                                                    : 'Copy Trading OFF'}
-                                                            </span>
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                                <div className='copy-trading__info'>
-                                                    <h4>How Copy Trading Works:</h4>
-                                                    <ul>
-                                                        <li>
-                                                            ✅ Trade on your demo account as usual in the Bot Builder
-                                                        </li>
-                                                        <li>
-                                                            ✅ When copy trading is enabled, identical trades are
-                                                            automatically placed on your real account
-                                                        </li>
-                                                        <li>
-                                                            ✅ Real account trades use the same parameters (symbol,
-                                                            amount, duration, etc.)
-                                                        </li>
-                                                        <li>
-                                                            ✅ You can disable copy trading anytime to stop mirroring
-                                                            trades
-                                                        </li>
-                                                        <li>✅ Only works when you have a real account balance</li>
-                                                        <li>
-                                                            ✅ Your real account balance is fetched automatically from
-                                                            Deriv
-                                                        </li>
-                                                    </ul>
+                                                <div className='copy-trading__status-indicator'>
+                                                    <span
+                                                        className={`copy-trading__status-dot ${realAccountBalance > 0 ? 'real' : 'inactive'}`}
+                                                    ></span>
+                                                    <span>{realAccountBalance > 0 ? 'Active' : 'Inactive'}</span>
                                                 </div>
                                             </div>
                                         </div>
+                                        <div className='copy-trading__controls'>
+                                            <div className='copy-trading__toggle'>
+                                                <label className='copy-trading__toggle-label'>
+                                                    <input
+                                                        type='checkbox'
+                                                        checked={copyTradingEnabled}
+                                                        onChange={handleCopyTradingToggle}
+                                                        disabled={realAccountBalance === 0}
+                                                    />
+                                                    <span className='copy-trading__toggle-slider'></span>
+                                                    <span className='copy-trading__toggle-text'>
+                                                        {copyTradingEnabled ? 'Copy Trading ON' : 'Copy Trading OFF'}
+                                                    </span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div className='copy-trading__info'>
+                                            <h4>How Copy Trading Works:</h4>
+                                            <ul>
+                                                <li>✅ Trade on your demo account as usual in the Bot Builder</li>
+                                                <li>
+                                                    ✅ When copy trading is enabled, identical trades are automatically
+                                                    placed on your real account
+                                                </li>
+                                                <li>
+                                                    ✅ Real account trades use the same parameters (symbol, amount,
+                                                    duration, etc.)
+                                                </li>
+                                                <li>
+                                                    ✅ You can disable copy trading anytime to stop mirroring trades
+                                                </li>
+                                                <li>✅ Only works when you have a real account balance</li>
+                                                <li>
+                                                    ✅ Your real account balance is fetched automatically from Deriv
+                                                </li>
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
-                            ) as React.ReactElement
-                        }
-                        {
-                            (
-                                <div
-                                    label={
-                                        <>
-                                            <SignalsIcon />
-                                            <Localize i18n_default_text='Signals' />
-                                        </>
-                                    }
-                                    id='id-signals'
-                                >
-                                    <div
-                                        className={classNames('dashboard__chart-wrapper', {
-                                            'dashboard__chart-wrapper--expanded': is_drawer_open && isDesktop,
-                                            'dashboard__chart-wrapper--modal': is_chart_modal_visible && isDesktop,
-                                        })}
-                                    >
-                                        <iframe
-                                            src='signals'
-                                            width='100%'
-                                            height='600px'
-                                            style={{ border: 'none', display: 'block' }}
-                                            title='Signals'
-                                            scrolling='yes'
-                                        />
-                                    </div>
-                                </div>
-                            ) as React.ReactElement
-                        }
-                        {
-                            (
-                                <div
-                                    label={
-                                        <>
-                                            <TradingHubIcon />
-                                            <Localize i18n_default_text='Trading Hub' />
-                                        </>
-                                    }
-                                    id='id-Trading-Hub'
-                                >
-                                    <div
-                                        className={classNames('dashboard__chart-wrapper', {
-                                            'dashboard__chart-wrapper--expanded': is_drawer_open && isDesktop,
-                                            'dashboard__chart-wrapper--modal': is_chart_modal_visible && isDesktop,
-                                        })}
-                                    >
-                                        <iframe
-                                            src='https://mekop.netlify.app'
-                                            height='600px'
-                                            frameBorder='0'
-                                            title='Trading Hub'
-                                        />
-                                    </div>
-                                </div>
-                            ) as React.ReactElement
-                        }
+                            </div>
+                        </div>
+                        ) as React.ReactElement}
+                        {(
+                        <div
+                            label={
+                                <>
+                                    <SignalsIcon />
+                                    <Localize i18n_default_text='Signals' />
+                                </>
+                            }
+                            id='id-signals'
+                        >
+                            <div
+                                className={classNames('dashboard__chart-wrapper', {
+                                    'dashboard__chart-wrapper--expanded': is_drawer_open && isDesktop,
+                                    'dashboard__chart-wrapper--modal': is_chart_modal_visible && isDesktop,
+                                })}
+                            >
+                                <iframe
+                                    src='signals'
+                                    width='100%'
+                                    height='600px'
+                                    style={{ border: 'none', display: 'block' }}
+                                    title='Signals'
+                                    scrolling='yes'
+                                />
+                            </div>
+                        </div>
+                        ) as React.ReactElement}
+                        {(
+                        <div
+                            label={
+                                <>
+                                    <TradingHubIcon />
+                                    <Localize i18n_default_text='Trading Hub' />
+                                </>
+                            }
+                            id='id-Trading-Hub'
+                        >
+                            <div
+                                className={classNames('dashboard__chart-wrapper', {
+                                    'dashboard__chart-wrapper--expanded': is_drawer_open && isDesktop,
+                                    'dashboard__chart-wrapper--modal': is_chart_modal_visible && isDesktop,
+                                })}
+                            >
+                                <iframe
+                                    src='https://mekop.netlify.app'
+                                    height='600px'
+                                    frameBorder='0'
+                                    title='Trading Hub'
+                                />
+                            </div>
+                        </div>
+                        ) as React.ReactElement}
                     </Tabs>
                 </div>
             </div>

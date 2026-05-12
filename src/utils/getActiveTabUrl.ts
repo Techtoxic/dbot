@@ -1,16 +1,6 @@
 export const getActiveTabUrl = () => {
     const current_tab_number = localStorage.getItem('active_tab');
-    const TAB_NAMES = [
-        'dashboard',
-        'free_bots',
-        'bot_builder',
-        'chart',
-        'analysis_tool',
-        'bulk_trading',
-        'tutorial',
-        'signals',
-        'trading_hub',
-    ] as const;
+    const TAB_NAMES = ['dashboard', 'free_bots', 'bot_builder', 'chart', 'analysis_tool', 'bulk_trading', 'tutorial', 'signals', 'trading_hub'] as const;
     const getTabName = (index: number) => TAB_NAMES[index];
     const current_tab_name = getTabName(Number(current_tab_number));
 

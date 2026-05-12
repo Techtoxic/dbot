@@ -188,10 +188,7 @@ function processTick(tick) {
 
     if (!rafPending) {
         rafPending = true;
-        requestAnimationFrame(() => {
-            rafPending = false;
-            updateDisplay();
-        });
+        requestAnimationFrame(() => { rafPending = false; updateDisplay(); });
     }
 }
 

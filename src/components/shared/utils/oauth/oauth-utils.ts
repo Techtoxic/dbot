@@ -35,12 +35,13 @@ export const generatePKCE = async (): Promise<PKCEData> => {
         .replace(/=+$/, '');
 
     // 3. Generate a random state for CSRF protection
-    const state = crypto.getRandomValues(new Uint8Array(16)).reduce((s, b) => s + b.toString(16).padStart(2, '0'), '');
+    const state = crypto.getRandomValues(new Uint8Array(16))
+        .reduce((s, b) => s + b.toString(16).padStart(2, '0'), '');
 
     return {
         codeVerifier,
         codeChallenge,
-        state,
+        state
     };
 };
 
@@ -69,7 +70,7 @@ export const retrievePKCEData = (): PKCEData | null => {
     return {
         codeVerifier,
         codeChallenge: '', // Not needed for retrieval
-        state,
+        state
     };
 };
 
@@ -94,7 +95,7 @@ export const buildOAuth2URL = (config: OAuth2Config, pkceData: PKCEData): string
         scope: config.scope,
         state: pkceData.state,
         code_challenge: pkceData.codeChallenge,
-        code_challenge_method: 'S256',
+        code_challenge_method: 'S256'
     });
 
     return `https://auth.deriv.com/oauth2/auth?${params.toString()}`;
@@ -118,8 +119,8 @@ export const exchangeCodeForToken = async (
             client_id: config.clientId,
             code,
             code_verifier: codeVerifier,
-            redirect_uri: config.redirectUri,
-        }),
+            redirect_uri: config.redirectUri
+        })
     });
 
     if (!response.ok) {
@@ -136,7 +137,8 @@ export const exchangeCodeForToken = async (
  */
 export const isOAuth2Callback = (): boolean => {
     const urlParams = new URLSearchParams(window.location.search);
-    return (urlParams.has('code') && urlParams.has('state')) || (urlParams.has('error') && urlParams.has('state'));
+    return (urlParams.has('code') && urlParams.has('state')) ||
+           (urlParams.has('error') && urlParams.has('state'));
 };
 
 /**
@@ -155,6 +157,6 @@ export const parseOAuth2Callback = (): { code: string | null; state: string | nu
     return {
         code: urlParams.get('code'),
         state: urlParams.get('state'),
-        error: urlParams.get('error'),
+        error: urlParams.get('error')
     };
 };

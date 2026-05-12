@@ -104,17 +104,14 @@ const Tabs = ({
             // if hash is in url, find which tab index correlates to it
             const hash = location.hash.slice(1);
             const childrenArray = React.Children.toArray(children) as React.ReactElement[];
-            const hash_index = childrenArray.findIndex(
-                child => child && child.props && (child.props as any).hash === hash
-            );
+            const hash_index = childrenArray.findIndex(child => child && child.props && (child.props as any).hash === hash);
             const has_hash = hash_index > -1;
 
             if (has_hash) {
                 initial_index_to_show = hash_index;
             } else {
                 // if no hash is in url but component has passed hash prop, set hash of the tab shown
-                const child_props = (React.Children.toArray(children) as React.ReactElement[])[initial_index_to_show]
-                    ?.props as any;
+                const child_props = (React.Children.toArray(children) as React.ReactElement[])[initial_index_to_show]?.props as any;
                 const current_id = child_props && child_props.hash;
                 if (current_id) {
                     pushHash(current_id);
@@ -226,8 +223,7 @@ const Tabs = ({
                                     'dc-tabs__active-line--bottom': bottom,
                                     'dc-tabs__active-line--fit-content': fit_content,
                                     'dc-tabs__active-line--header-fit-content': header_fit_content,
-                                    'dc-tabs__active-line--is-hidden':
-                                        childrenArray.length === 1 && single_tab_has_no_label,
+                                    'dc-tabs__active-line--is-hidden': childrenArray.length === 1 && single_tab_has_no_label,
                                 })}
                                 style={active_line_style}
                             />

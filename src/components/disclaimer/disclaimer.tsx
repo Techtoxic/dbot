@@ -16,7 +16,11 @@ const Disclaimer = () => {
     return (
         <>
             {/* Disclaimer Button - Bottom Right */}
-            <button className='disclaimer-button' onClick={() => setShowDisclaimer(true)} title='View Disclaimer'>
+            <button
+                className="disclaimer-button"
+                onClick={() => setShowDisclaimer(true)}
+                title="View Disclaimer"
+            >
                 Disclaimer
             </button>
 
@@ -24,21 +28,21 @@ const Disclaimer = () => {
             <Modal
                 is_open={showDisclaimer}
                 toggleModal={() => setShowDisclaimer(false)}
-                title='Risk Disclaimer'
+                title="Risk Disclaimer"
                 is_vertical_centered={true}
-                width='500px'
-                className='disclaimer-modal'
+                width="500px"
+                className="disclaimer-modal"
             >
-                <div className='disclaimer-content'>
-                    <div className='disclaimer-text'>
-                        {disclaimerText
-                            .trim()
-                            .split('\n\n')
-                            .map((paragraph, index) => (
-                                <p key={index}>{paragraph.trim()}</p>
-                            ))}
+                <div className="disclaimer-content">
+                    <div className="disclaimer-text">
+                        {disclaimerText.trim().split('\n\n').map((paragraph, index) => (
+                            <p key={index}>{paragraph.trim()}</p>
+                        ))}
                     </div>
-                    <button className='disclaimer-understand-btn' onClick={() => setShowDisclaimer(false)}>
+                    <button
+                        className="disclaimer-understand-btn"
+                        onClick={() => setShowDisclaimer(false)}
+                    >
                         I Understand
                     </button>
                 </div>

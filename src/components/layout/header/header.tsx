@@ -150,9 +150,9 @@ const AppHeader = observer(() => {
     const { localize } = useTranslations();
 
     // Trial account logic - check if current user is a trial account
-    // const isCurrentUserTrialAccount = isTrialAccount(activeLoginid);
-    // const displayCurrency = getDisplayCurrency(activeLoginid, activeAccount?.currency);
-    // const displayAccountType = getDisplayAccountType(activeLoginid, Boolean(activeAccount?.is_virtual));
+        // const isCurrentUserTrialAccount = isTrialAccount(activeLoginid);
+        // const displayCurrency = getDisplayCurrency(activeLoginid, activeAccount?.currency);
+        // const displayAccountType = getDisplayAccountType(activeLoginid, Boolean(activeAccount?.is_virtual));
 
     // Render account info and actions depending on auth state
     const renderAccountSection = () => {
@@ -231,6 +231,7 @@ const AppHeader = observer(() => {
                 <InfoIcon />
             </Wrapper>
             <Wrapper variant='right'>{renderAccountSection()}</Wrapper>
+
         </Header>
     );
 });

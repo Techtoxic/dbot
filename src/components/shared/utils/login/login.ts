@@ -9,16 +9,16 @@ const REDIRECT_URI = 'https://dbotke.netlify.app/callback';
 const OAUTH_CONFIG: OAuth2Config = {
     clientId: '338JkzW1UxRbtJPRKWWCu',
     redirectUri: REDIRECT_URI,
-    scope: 'trade',
+    scope: 'trade'
 };
 
 export const redirectToLogin = async () => {
     try {
         console.log('Starting OAuth 2.0 flow...');
-
+        
         // Generate PKCE data for OAuth2 flow
         const pkceData = await generatePKCE();
-
+        
         // Store PKCE data in session storage before redirecting
         storePKCEData(pkceData);
 
@@ -47,9 +47,9 @@ export const redirectToLogin = async () => {
 const fallbackToLegacyOAuth = () => {
     console.log('Falling back to legacy OAuth...');
     forceCorrectAppId();
-
+    
     const legacyOauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=133723&response_type=token&scope=read,trade&l=EN&brand=deriv&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
-
+    
     console.log('Legacy OAuth URL:', legacyOauthUrl);
     window.location.href = legacyOauthUrl;
 };
