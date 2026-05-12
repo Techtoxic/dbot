@@ -126,7 +126,7 @@ export const AuthWrapper = () => {
         return () => {
             isMounted = false;
         };
-    }, [loginInfo, paramsToDelete]);
+    }, []);
 
     if (!isAuthComplete) {
         return <ChunkLoader message={localize('Initializing...')} />;
