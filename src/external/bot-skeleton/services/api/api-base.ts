@@ -1,4 +1,5 @@
 import CommonStore from '@/stores/common-store';
+import { DerivWSAccountsService } from '@/services/derivws-accounts.service';
 import { TAuthData } from '@/types/api-types';
 import { observer as globalObserver } from '../../utils/observer';
 import { doUntilDone, socket_state } from '../tradeEngine/utils/helpers';
@@ -11,7 +12,7 @@ import {
     setIsAuthorizing,
 } from './observables/connection-status-stream';
 import ApiHelpers from './api-helpers';
-import { generateDerivApiInstance, V2GetActiveClientId, V2GetActiveToken } from './appId';
+import { generateDerivApiInstance, isOAuth2Authenticated, V2GetActiveAccountId, V2GetActiveClientId, V2GetActiveToken } from './appId';
 import { normalizeAuthorizeResponse } from './authorize-response';
 import chart_api from './chart-api';
 
@@ -35,6 +36,7 @@ type TApiBaseApi = {
     send: (data: unknown) => void;
     disconnect: () => void;
     authorize: (token: string) => Promise<{ authorize: TAuthData; error: unknown }>;
+    balance: () => Promise<{ balance: any; error: unknown }>;
     getSelfExclusion: () => Promise<unknown>;
     onMessage: () => {
         subscribe: (callback: (message: unknown) => void) => {
@@ -42,6 +44,14 @@ type TApiBaseApi = {
         };
     };
 } & ReturnType<typeof generateDerivApiInstance>;
+
+/**
+ * Helper function to check if account is demo based on loginid prefix
+ */
+const isDemoAccount = (loginid: string | undefined): boolean => {
+    if (!loginid) return false;
+    return loginid.startsWith('VRT') || loginid.startsWith('VRTC');
+};
 
 class APIBase {
     api: TApiBaseApi | null = null;
@@ -98,12 +108,17 @@ class APIBase {
                 this.api.connection.removeEventListener('open', this.onsocketopen.bind(this));
                 this.api.connection.removeEventListener('close', this.onsocketclose.bind(this));
             }
-            this.api = generateDerivApiInstance();
+            // generateDerivApiInstance is now async
+            this.api = await generateDerivApiInstance();
             this.api?.connection.addEventListener('open', this.onsocketopen.bind(this));
             this.api?.connection.addEventListener('close', this.onsocketclose.bind(this));
         }
 
-        if (!this.has_active_symbols && !V2GetActiveToken()) {
+        // Check if we should authorize - for OAuth2, check if we have an active account
+        const hasActiveAccount = V2GetActiveAccountId();
+        const hasToken = V2GetActiveToken();
+        
+        if (!this.has_active_symbols && !hasActiveAccount && !hasToken) {
             this.active_symbols_promise = this.getActiveSymbols();
         }
 
@@ -112,7 +127,8 @@ class APIBase {
         if (this.time_interval) clearInterval(this.time_interval);
         this.time_interval = null;
 
-        if (V2GetActiveToken()) {
+        // Authorize if we have credentials (OAuth2 or legacy)
+        if (hasActiveAccount || hasToken) {
             setIsAuthorizing(true);
             await this.authorizeAndSubscribe();
         }
@@ -157,54 +173,176 @@ class APIBase {
     };
 
     async authorizeAndSubscribe() {
-        const token = V2GetActiveToken();
-        if (token) {
-            this.token = token;
-            this.account_id = V2GetActiveClientId() ?? '';
+        if (!this.api) return;
 
-            if (!this.api) return;
+        // Check if using OAuth2 flow
+        if (isOAuth2Authenticated()) {
+            return this.authorizeWithOAuth2();
+        }
+        
+        // Fall back to legacy token-based authorization
+        return this.authorizeWithLegacyToken();
+    }
 
-            try {
-                // Race authorize against a 12-second timeout so a dropped socket can't hang init() forever
-                const authorizeTimeout = new Promise<never>((_, reject) =>
-                    setTimeout(() => reject(new Error('Authorize timed out after 12 seconds')), AUTHORIZE_TIMEOUT_MS)
-                );
-                const authorize_response = await Promise.race([this.api.authorize(this.token), authorizeTimeout]);
-                const { authorize, error } = normalizeAuthorizeResponse(authorize_response);
-                if (error || !authorize) {
-                    if (error instanceof Error) {
-                        throw error;
-                    }
-                    const error_details = (() => {
-                        if (!error) return 'Empty authorize payload';
-                        try {
-                            return JSON.stringify(error);
-                        } catch {
-                            return String(error);
-                        }
-                    })();
-                    throw new Error(`Authorize failed: ${error_details}`);
-                }
+    /**
+     * OAuth2 authorization flow
+     * In OAuth2, the WebSocket URL is already authenticated via OTP,
+     * so we just need to call balance API to get account info
+     */
+    async authorizeWithOAuth2() {
+        if (!this.api) return;
 
-                if (this.has_active_symbols) {
-                    this.toggleRunButton(false);
-                } else {
-                    this.active_symbols_promise = this.getActiveSymbols();
-                }
-                this.account_info = authorize;
-                setAccountList(authorize.account_list);
-                setAuthData(authorize);
-                setIsAuthorized(true);
-                this.is_authorized = true;
-                this.subscribe();
-                this.getSelfExclusion();
-            } catch (e) {
-                this.is_authorized = false;
-                setIsAuthorized(false);
-                globalObserver.emit('Error', e);
-            } finally {
+        this.account_id = V2GetActiveAccountId() || '';
+        
+        try {
+            // In OAuth2, the WebSocket is pre-authenticated via OTP
+            // We just need to call balance to get the account info
+            const { balance, error } = await this.api.balance();
+
+            if (error) {
+                console.error('OAuth2 authorization error:', error);
                 setIsAuthorizing(false);
+                throw new Error(typeof error === 'object' && 'message' in error ? (error as any).message : 'Authorization failed');
             }
+
+            this.account_info = {
+                balance: balance?.balance,
+                currency: balance?.currency,
+                loginid: balance?.loginid,
+            };
+            this.token = balance?.loginid;
+
+            const isDemo = isDemoAccount(balance?.loginid);
+            const currentAccount = balance?.loginid
+                ? {
+                      balance: balance.balance,
+                      currency: balance.currency || 'USD',
+                      is_virtual: isDemo ? 1 : 0,
+                      loginid: balance.loginid,
+                  }
+                : null;
+
+            // Build full account list from sessionStorage (populated during OAuth flow)
+            const storedAccounts = DerivWSAccountsService.getStoredAccounts();
+            const accountList =
+                storedAccounts && storedAccounts.length > 0
+                    ? storedAccounts
+                          .filter(a => !a.status || a.status === 'active')
+                          .map(a => ({
+                              balance: parseFloat(a.balance) || 0,
+                              currency: a.currency || 'USD',
+                              is_virtual: a.account_type === 'demo' ? 1 : 0,
+                              loginid: a.account_id,
+                          }))
+                    : currentAccount
+                      ? [currentAccount]
+                      : [];
+
+            setAccountList(accountList);
+            setAuthData({
+                balance: balance?.balance,
+                currency: balance?.currency,
+                loginid: balance?.loginid,
+                is_virtual: isDemo ? 1 : 0,
+                account_list: accountList,
+            });
+
+            // Set account_type in localStorage
+            if (isDemo) {
+                localStorage.setItem('account_type', 'demo');
+            } else {
+                localStorage.setItem('account_type', 'real');
+            }
+
+            globalObserver.emit('api.authorize', {
+                account_list: accountList,
+                current_account: {
+                    loginid: balance?.loginid,
+                    currency: balance?.currency || 'USD',
+                    is_virtual: isDemo ? 0 : 1,
+                    balance: typeof balance?.balance === 'number' ? balance.balance : undefined,
+                },
+            });
+
+            setIsAuthorized(true);
+            this.is_authorized = true;
+            localStorage.setItem('client_account_details', JSON.stringify(accountList));
+            localStorage.setItem('client.country', balance?.country);
+
+            if (balance?.loginid) {
+                localStorage.setItem('active_loginid', balance.loginid);
+            }
+
+            if (this.has_active_symbols) {
+                this.toggleRunButton(false);
+            } else {
+                this.active_symbols_promise = this.getActiveSymbols();
+            }
+            
+            this.subscribe();
+            console.log('[APIBase] OAuth2 authorization successful:', balance?.loginid);
+        } catch (e) {
+            this.is_authorized = false;
+            setIsAuthorized(false);
+            globalObserver.emit('Error', e);
+            console.error('[APIBase] OAuth2 authorization failed:', e);
+        } finally {
+            setIsAuthorizing(false);
+        }
+    }
+
+    /**
+     * Legacy token-based authorization flow
+     */
+    async authorizeWithLegacyToken() {
+        const token = V2GetActiveToken();
+        if (!token) return;
+
+        this.token = token;
+        this.account_id = V2GetActiveClientId() ?? '';
+
+        if (!this.api) return;
+
+        try {
+            // Race authorize against a 12-second timeout
+            const authorizeTimeout = new Promise<never>((_, reject) =>
+                setTimeout(() => reject(new Error('Authorize timed out after 12 seconds')), AUTHORIZE_TIMEOUT_MS)
+            );
+            const authorize_response = await Promise.race([this.api.authorize(this.token), authorizeTimeout]);
+            const { authorize, error } = normalizeAuthorizeResponse(authorize_response);
+            if (error || !authorize) {
+                if (error instanceof Error) {
+                    throw error;
+                }
+                const error_details = (() => {
+                    if (!error) return 'Empty authorize payload';
+                    try {
+                        return JSON.stringify(error);
+                    } catch {
+                        return String(error);
+                    }
+                })();
+                throw new Error(`Authorize failed: ${error_details}`);
+            }
+
+            if (this.has_active_symbols) {
+                this.toggleRunButton(false);
+            } else {
+                this.active_symbols_promise = this.getActiveSymbols();
+            }
+            this.account_info = authorize;
+            setAccountList(authorize.account_list);
+            setAuthData(authorize);
+            setIsAuthorized(true);
+            this.is_authorized = true;
+            this.subscribe();
+            this.getSelfExclusion();
+        } catch (e) {
+            this.is_authorized = false;
+            setIsAuthorized(false);
+            globalObserver.emit('Error', e);
+        } finally {
+            setIsAuthorizing(false);
         }
     }
 
