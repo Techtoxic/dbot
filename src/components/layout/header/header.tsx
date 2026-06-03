@@ -199,10 +199,16 @@ const AppHeader = observer(() => {
             <div className='auth-actions'>
                 <Button
                     tertiary
-                    onClick={() => {
-                        const redirectUri = window.location.origin;
-                        const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=97842&l=EN&brand=deriv&redirect_uri=${encodeURIComponent(redirectUri)}`;
-                        window.location.replace(oauthUrl);
+                    onClick={async () => {
+                        const { generateOAuthURL } = await import('@/components/shared/utils/config/config');
+                        const oauthUrl = await generateOAuthURL();
+                        if (oauthUrl) {
+                            window.location.replace(oauthUrl);
+                        } else {
+                            // fallback
+                            const redirectUri = window.location.origin;
+                            window.location.replace(`https://oauth.deriv.com/oauth2/authorize?app_id=97842&l=EN&brand=deriv&redirect_uri=${encodeURIComponent(redirectUri)}`);
+                        }
                     }}
                 >
                     <Localize i18n_default_text='Log in' />
