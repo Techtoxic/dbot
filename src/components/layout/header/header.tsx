@@ -2,7 +2,6 @@ import { useState } from 'react';
 import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 import { standalone_routes } from '@/components/shared';
-import { getAppId } from '@/components/shared';
 import Button from '@/components/shared_ui/button';
 import Modal from '@/components/shared_ui/modal';
 import useActiveAccount from '@/hooks/api/account/useActiveAccount';
@@ -201,9 +200,8 @@ const AppHeader = observer(() => {
                 <Button
                     tertiary
                     onClick={() => {
-                        const { getAppId } = require('@/components/shared');
                         const redirectUri = window.location.origin;
-                        const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${getAppId()}&l=EN&brand=deriv&redirect_uri=${encodeURIComponent(redirectUri)}`;
+                        const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=97842&l=EN&brand=deriv&redirect_uri=${encodeURIComponent(redirectUri)}`;
                         window.location.replace(oauthUrl);
                     }}
                 >
