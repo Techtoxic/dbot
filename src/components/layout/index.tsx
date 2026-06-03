@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 import { Outlet } from 'react-router-dom';
 import { api_base } from '@/external/bot-skeleton';
 import { useOauth2 } from '@/hooks/auth/useOauth2';
-import { requestOidcAuthentication } from '@deriv-com/auth-client';
+import { getAppId } from '@/components/shared';
 import { useDevice } from '@deriv-com/ui';
 import { crypto_currencies_display_order, fiat_currencies_display_order } from '../shared';
 import Disclaimer from '../disclaimer';
@@ -76,9 +76,9 @@ const Layout = () => {
             (isLoggedInCookie && !isClientAccountsPopulated && isOAuth2Enabled && !isEndpointPage && !isCallbackPage) ||
             !clientHasCurrency
         ) {
-            requestOidcAuthentication({
-                redirectCallbackUri: `${window.location.origin}/callback`,
-            });
+            const redirectUri = `${window.location.origin}/callback`;
+            const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${getAppId()}&response_type=token&scope=read,trade,admin&l=EN&brand=deriv&redirect_uri=${encodeURIComponent(redirectUri)}`;
+            window.location.href = oauthUrl;
         }
     }, [
         isLoggedInCookie,
