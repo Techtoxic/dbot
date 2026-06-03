@@ -273,3 +273,30 @@ export const generateOAuthURL = async (prompt?: string) => {
     // Fallback to hardcoded URLs if brand config fails
     return ``;
 };
+
+// =============================================================================
+// Legacy compatibility exports needed by existing code
+// =============================================================================
+
+export const CURRENT_APP_ID = '97842';
+
+export const getAppId = (): string => {
+    return localStorage.getItem('config.app_id') || CURRENT_APP_ID;
+};
+
+export const forceCorrectAppId = (): void => {
+    localStorage.setItem('config.app_id', CURRENT_APP_ID);
+};
+
+export const getCurrentProductionDomain = (): string | undefined => {
+    const hostname = window.location.hostname;
+    const productionDomains = Object.values(PRODUCTION_DOMAINS) as string[];
+    return productionDomains.find(domain => hostname === domain);
+};
+
+export const getDefaultAppIdAndUrl = (): { app_id: string; server_url: string } => {
+    return {
+        app_id: CURRENT_APP_ID,
+        server_url: getSocketURL(),
+    };
+};
