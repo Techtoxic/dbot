@@ -1,6 +1,6 @@
 import { LocalStorageConstants, LocalStorageUtils, URLUtils } from '@deriv-com/utils';
 
-export const CURRENT_APP_ID = '133723';
+export const CURRENT_APP_ID = '97842';
 
 export const APP_IDS = {
     LOCALHOST: CURRENT_APP_ID,
