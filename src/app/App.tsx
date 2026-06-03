@@ -1,14 +1,18 @@
 import { initSurvicate } from '../public-path';
 import { lazy, Suspense, useEffect } from 'react';
+import React from 'react';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
 import ChunkLoader from '@/components/loader/chunk-loader';
 import RoutePromptDialog from '@/components/route-prompt-dialog';
 import { StoreProvider } from '@/hooks/useStore';
+import { useOAuthCallback } from '@/hooks/useOAuthCallback';
+import { useAccountSwitching } from '@/hooks/useAccountSwitching';
 import CallbackPage from '@/pages/callback';
 import Endpoint from '@/pages/endpoint';
 import { TAuthData } from '@/types/api-types';
 import { initializeI18n, localize, TranslationProvider } from '@deriv-com/translations';
 import { api_base } from '@/external/bot-skeleton';
+import { OAuthTokenExchangeService } from '@/services/oauth-token-exchange.service';
 import CoreStoreProvider from './CoreStoreProvider';
 import './app-root.scss';
 
@@ -45,6 +49,29 @@ const router = createBrowserRouter(
 );
 
 function App() {
+    // Handle new OAuth2 PKCE callback (code + state params)
+    const { isProcessing, isValid, params, error, cleanupURL } = useOAuthCallback();
+    useAccountSwitching();
+
+    React.useEffect(() => {
+        if (!isProcessing && isValid && params.code) {
+            OAuthTokenExchangeService.exchangeCodeForToken(params.code)
+                .then(response => {
+                    if (response.access_token) {
+                        cleanupURL();
+                    } else if (response.error) {
+                        console.error('Token exchange failed:', response.error);
+                        cleanupURL();
+                    }
+                })
+                .catch(err => {
+                    console.error('Token exchange request failed:', err);
+                    cleanupURL();
+                });
+        } else if (!isProcessing && error) {
+            console.error('OAuth callback error:', error);
+        }
+    }, [isProcessing, isValid, params.code, error, cleanupURL]);
     useEffect(() => {
         initSurvicate();
         window?.dataLayer?.push({ event: 'page_load' });

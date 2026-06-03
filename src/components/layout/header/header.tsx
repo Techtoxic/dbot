@@ -200,16 +200,10 @@ const AppHeader = observer(() => {
             <div className='auth-actions'>
                 <Button
                     tertiary
-                    onClick={() => {
-                        // Get the current domain for the redirect URI
-                        const currentOrigin = window.location.origin;
-                        const redirectUri = `${currentOrigin}/callback`;
-
-                        // Construct the OAuth URL with proper redirect_uri
-                        const oauthUrl = `https://oauth.deriv.com/oauth2/authorize?app_id=${getAppId()}&response_type=token&scope=read,trade,admin&l=EN&brand=deriv&redirect_uri=${encodeURIComponent(redirectUri)}`;
-
-                        console.log('🔐 Header login redirecting to OAuth with redirect_uri:', redirectUri);
-                        window.location.replace(oauthUrl);
+                    onClick={async () => {
+                        const { generateOAuthURL } = await import('@/components/shared');
+                        const oauthUrl = await generateOAuthURL();
+                        if (oauthUrl) window.location.replace(oauthUrl);
                     }}
                 >
                     <Localize i18n_default_text='Log in' />
